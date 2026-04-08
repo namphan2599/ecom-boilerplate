@@ -23,7 +23,7 @@ description: Break down work into actionable tasks and estimate timeline
 
 ### Phase 2: Core Features
 - [x] Task 2.1: Model `User`, `Product`, `Category`, `Tag`, `ProductVariant`, `Coupon`, `Order`, and `OrderItem` in Prisma
-- [ ] Task 2.2: Implement catalog CRUD and admin-only product management
+- [x] Task 2.2: Implement catalog CRUD and admin-only product management
 - [ ] Task 2.3: Implement Redis-backed cart persistence and cart pricing snapshot logic
 - [ ] Task 2.4: Implement inventory reservation, confirmation, and release flows
 - [ ] Task 2.5: Implement discount validation and usage limit enforcement

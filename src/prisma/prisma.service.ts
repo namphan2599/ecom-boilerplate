@@ -23,8 +23,15 @@ export class PrismaService
       return;
     }
 
-    await this.$connect();
-    this.isConnected = true;
+    try {
+      await this.$connect();
+      this.isConnected = true;
+    } catch (error) {
+      this.logger.warn(
+        `Prisma connection failed. Falling back to non-database mode: ${error instanceof Error ? error.message : 'unknown error'}`,
+      );
+      this.isConnected = false;
+    }
   }
 
   async onModuleDestroy(): Promise<void> {
@@ -33,6 +40,10 @@ export class PrismaService
     }
 
     await this.$disconnect();
+  }
+
+  isReady(): boolean {
+    return this.isConnected;
   }
 
   enableShutdownHooks(app: INestApplication): void {
