@@ -1,4 +1,7 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
+import { Roles } from './common/auth/roles.decorator';
+import { AppRole } from './common/auth/role.enum';
 import { AppService } from './app.service';
 
 @Controller()
@@ -8,5 +11,25 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  @Get('admin/summary')
+  @UseGuards(JwtAuthGuard)
+  @Roles(AppRole.ADMIN)
+  getAdminSummary(): { scope: AppRole; capabilities: string[] } {
+    return {
+      scope: AppRole.ADMIN,
+      capabilities: ['catalog-management', 'inventory-control', 'order-fulfillment'],
+    };
+  }
+
+  @Get('me/orders')
+  @UseGuards(JwtAuthGuard)
+  @Roles(AppRole.CUSTOMER, AppRole.ADMIN)
+  getOrderHistoryContext(): { scope: string; resource: string } {
+    return {
+      scope: 'authenticated',
+      resource: 'order-history',
+    };
   }
 }
