@@ -1,7 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, ProductStatus } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../storage/rustfs-storage.service';
 import { CreateProductDto, ProductVariantDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -29,6 +30,7 @@ export interface CatalogProductView {
   description?: string | null;
   status: ProductStatus;
   imageUrl?: string | null;
+  imageKey?: string | null;
   isFeatured: boolean;
   category: { id: string; name: string; slug: string } | null;
   tags: Array<{ id: string; name: string; slug: string }>;
@@ -62,11 +64,21 @@ export interface CatalogVariantSnapshot {
   inventoryReserved: number;
 }
 
+export interface ProductImageFile {
+  originalname: string;
+  mimetype: string;
+  size: number;
+  buffer: Buffer;
+}
+
 @Injectable()
 export class CatalogService {
   private readonly fallbackProducts = new Map<string, CatalogProductView>();
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {
     const seeded = this.createFallbackProduct({
       name: 'Aura Signature Hoodie',
       slug: 'aura-signature-hoodie',
@@ -199,6 +211,107 @@ export class CatalogService {
     return product;
   }
 
+  async uploadProductImage(
+    id: string,
+    file: ProductImageFile,
+  ): Promise<CatalogProductView> {
+    const existing = await this.getProductByIdForWrite(id);
+
+    if (existing.status === ProductStatus.ARCHIVED) {
+      throw new BadRequestException(
+        'Archived products cannot accept media uploads.',
+      );
+    }
+
+    const extension = this.resolveImageExtension(file);
+    const previousKey = existing.imageKey ?? null;
+    const bucket = this.storage.getDefaultBucket();
+    const uploaded = await this.storage.uploadObject({
+      bucket,
+      key: this.buildProductImageKey(id, extension),
+      body: file.buffer,
+      contentType: file.mimetype,
+      contentLength: file.size,
+    });
+
+    try {
+      if (this.prisma.isReady()) {
+        const updated = await this.prisma.product.update({
+          where: { id },
+          data: {
+            imageUrl: uploaded.url,
+            imageKey: uploaded.key,
+          },
+          include: productInclude,
+        });
+
+        if (previousKey && previousKey !== uploaded.key) {
+          await this.tryDeleteObject(bucket, previousKey);
+        }
+
+        return this.toView(updated);
+      }
+
+      const fallbackProduct = this.fallbackProducts.get(id);
+      if (!fallbackProduct) {
+        throw new NotFoundException(`Product with id \`${id}\` was not found.`);
+      }
+
+      const updated: CatalogProductView = {
+        ...fallbackProduct,
+        imageUrl: uploaded.url,
+        imageKey: uploaded.key,
+      };
+
+      this.fallbackProducts.set(id, updated);
+
+      if (previousKey && previousKey !== uploaded.key) {
+        await this.tryDeleteObject(bucket, previousKey);
+      }
+
+      return updated;
+    } catch (error) {
+      await this.tryDeleteObject(bucket, uploaded.key);
+      throw error;
+    }
+  }
+
+  async deleteProductImage(id: string): Promise<CatalogProductView> {
+    const existing = await this.getProductByIdForWrite(id);
+    const bucket = this.storage.getDefaultBucket();
+
+    if (existing.imageKey) {
+      await this.tryDeleteObject(bucket, existing.imageKey);
+    }
+
+    if (this.prisma.isReady()) {
+      const updated = await this.prisma.product.update({
+        where: { id },
+        data: {
+          imageUrl: null,
+          imageKey: null,
+        },
+        include: productInclude,
+      });
+
+      return this.toView(updated);
+    }
+
+    const fallbackProduct = this.fallbackProducts.get(id);
+    if (!fallbackProduct) {
+      throw new NotFoundException(`Product with id \`${id}\` was not found.`);
+    }
+
+    const updated: CatalogProductView = {
+      ...fallbackProduct,
+      imageUrl: null,
+      imageKey: null,
+    };
+
+    this.fallbackProducts.set(id, updated);
+    return updated;
+  }
+
   async resolveVariantSnapshot(
     sku: string,
     currencyCode: string,
@@ -297,6 +410,7 @@ export class CatalogService {
       description: input.description ?? existing.description,
       status: input.status ?? existing.status,
       imageUrl: input.imageUrl ?? existing.imageUrl,
+      imageKey: existing.imageKey,
       isFeatured: input.isFeatured ?? existing.isFeatured,
       category:
         input.category === undefined
@@ -465,6 +579,7 @@ export class CatalogService {
       description: product.description,
       status: product.status,
       imageUrl: product.imageUrl,
+      imageKey: product.imageKey,
       isFeatured: product.isFeatured,
       category: product.category
         ? {
@@ -504,6 +619,7 @@ export class CatalogService {
       description: input.description,
       status: input.status ?? ProductStatus.DRAFT,
       imageUrl: input.imageUrl,
+      imageKey: null,
       isFeatured: input.isFeatured ?? false,
       category: input.category
         ? {
@@ -538,5 +654,57 @@ export class CatalogService {
         compareAtAmount: price.compareAtAmount ?? null,
       })),
     };
+  }
+
+  private async getProductByIdForWrite(id: string): Promise<CatalogProductView> {
+    if (this.prisma.isReady()) {
+      const product = await this.prisma.product.findUnique({
+        where: { id },
+        include: productInclude,
+      });
+
+      if (!product) {
+        throw new NotFoundException(`Product with id \`${id}\` was not found.`);
+      }
+
+      return this.toView(product);
+    }
+
+    const fallbackProduct = this.fallbackProducts.get(id);
+    if (!fallbackProduct) {
+      throw new NotFoundException(`Product with id \`${id}\` was not found.`);
+    }
+
+    return fallbackProduct;
+  }
+
+  private resolveImageExtension(file: ProductImageFile): string {
+    const normalizedMimeType = file.mimetype.toLowerCase();
+
+    switch (normalizedMimeType) {
+      case 'image/jpeg':
+      case 'image/jpg':
+        return '.jpg';
+      case 'image/png':
+        return '.png';
+      case 'image/webp':
+        return '.webp';
+      default:
+        throw new BadRequestException(
+          'Only JPEG, PNG, and WebP product images are supported.',
+        );
+    }
+  }
+
+  private buildProductImageKey(productId: string, extension: string): string {
+    return `products/${productId}/hero-${Date.now()}-${randomUUID().slice(0, 8)}${extension}`;
+  }
+
+  private async tryDeleteObject(bucket: string, key: string): Promise<void> {
+    try {
+      await this.storage.deleteObject({ bucket, key });
+    } catch {
+      // Ignore cleanup failures to keep the primary request outcome stable.
+    }
   }
 }

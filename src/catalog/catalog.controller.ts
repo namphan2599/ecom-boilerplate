@@ -1,15 +1,21 @@
 import {
+  BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
   Post,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
@@ -18,6 +24,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import {
   ApiErrorResponseDto,
@@ -29,6 +36,10 @@ import { RolesGuard } from '../common/auth/roles.guard';
 import { CatalogService } from './catalog.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+
+const PRODUCT_IMAGE_MAX_BYTES = Number(
+  process.env.PRODUCT_MEDIA_MAX_BYTES ?? 5_242_880,
+);
 
 @ApiTags('catalog')
 @Controller('catalog')
@@ -126,6 +137,91 @@ export class CatalogController {
   })
   createProduct(@Body() input: CreateProductDto) {
     return this.catalogService.createProduct(input);
+  }
+
+  @Post('admin/products/:id/image')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: {
+        fileSize: PRODUCT_IMAGE_MAX_BYTES,
+      },
+    }),
+  )
+  @Roles(AppRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiOperation({ summary: 'Upload or replace a product hero image as an admin' })
+  @ApiCreatedResponse({
+    description: 'Stores a product hero image and returns the updated product payload.',
+  })
+  @ApiBadRequestResponse({
+    description: 'The upload is missing, invalid, or not one of JPEG/PNG/WebP.',
+    type: ApiErrorResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'A valid admin bearer token is required.',
+    type: ApiErrorResponseDto,
+  })
+  @ApiForbiddenResponse({
+    description: 'Only admin users can upload product media.',
+    type: ApiErrorResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'The requested product id does not exist.',
+    type: ApiErrorResponseDto,
+  })
+  uploadProductImage(
+    @Param('id') id: string,
+    @UploadedFile()
+    file: {
+      originalname: string;
+      mimetype: string;
+      size: number;
+      buffer: Buffer;
+    },
+  ) {
+    if (!file) {
+      throw new BadRequestException('A product image file is required.');
+    }
+
+    return this.catalogService.uploadProductImage(id, file);
+  }
+
+  @Delete('admin/products/:id/image')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(AppRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a product hero image as an admin' })
+  @ApiOkResponse({
+    description: 'Clears the product image metadata and removes the stored object reference.',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'A valid admin bearer token is required.',
+    type: ApiErrorResponseDto,
+  })
+  @ApiForbiddenResponse({
+    description: 'Only admin users can delete product media.',
+    type: ApiErrorResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'The requested product id does not exist.',
+    type: ApiErrorResponseDto,
+  })
+  deleteProductImage(@Param('id') id: string) {
+    return this.catalogService.deleteProductImage(id);
   }
 
   @Patch('admin/products/:id')

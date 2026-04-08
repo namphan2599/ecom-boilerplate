@@ -16,6 +16,10 @@ describe('AppController (e2e)', () => {
     await app.init();
   });
 
+  afterEach(async () => {
+    await app.close();
+  });
+
   it('/ (GET)', () => {
     return request(app.getHttpServer())
       .get('/')
@@ -107,6 +111,90 @@ describe('AppController (e2e)', () => {
 
     expect(createResponse.body.slug).toBe('aura-everyday-tee');
     expect(createResponse.body.variants).toHaveLength(1);
+  });
+
+  it('/catalog/admin/products/:id/image (POST) stores product media for admins', async () => {
+    const loginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'admin@aura.local',
+        password: 'Admin123!',
+      })
+      .expect(201);
+
+    const { accessToken } = loginResponse.body;
+
+    const createResponse = await request(app.getHttpServer())
+      .post('/catalog/admin/products')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        name: 'Aura Media Tee',
+        slug: 'aura-media-tee',
+        variants: [
+          {
+            sku: 'TEE-MEDIA-M',
+            title: 'Black / Medium',
+            attributes: { color: 'black', size: 'M' },
+            prices: [{ currencyCode: 'USD', amount: 39.99 }],
+          },
+        ],
+      })
+      .expect(201);
+
+    const validPngBuffer = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO7+XyQAAAAASUVORK5CYII=',
+      'base64',
+    );
+
+    const uploadResponse = await request(app.getHttpServer())
+      .post(`/catalog/admin/products/${createResponse.body.id}/image`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .attach('file', validPngBuffer, {
+        filename: 'hero.png',
+        contentType: 'image/png',
+      })
+      .expect(201);
+
+    expect(uploadResponse.body.imageUrl).toMatch(/^https?:\/\//);
+    expect(uploadResponse.body.imageKey).toContain('products/');
+  });
+
+  it('/catalog/admin/products/:id/image (POST) rejects unsupported file types', async () => {
+    const loginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'admin@aura.local',
+        password: 'Admin123!',
+      })
+      .expect(201);
+
+    const { accessToken } = loginResponse.body;
+
+    const createResponse = await request(app.getHttpServer())
+      .post('/catalog/admin/products')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        name: 'Aura Invalid Media Tee',
+        slug: 'aura-invalid-media-tee',
+        variants: [
+          {
+            sku: 'TEE-INVALID-M',
+            title: 'Black / Medium',
+            attributes: { color: 'black', size: 'M' },
+            prices: [{ currencyCode: 'USD', amount: 34.99 }],
+          },
+        ],
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post(`/catalog/admin/products/${createResponse.body.id}/image`)
+      .set('Authorization', `Bearer ${accessToken}`)
+      .attach('file', Buffer.from('%PDF-1.7'), {
+        filename: 'hero.pdf',
+        contentType: 'application/pdf',
+      })
+      .expect(400);
   });
 
   it('/cart (GET) rejects anonymous users', () => {
