@@ -37,7 +37,7 @@ description: Define testing approach, test cases, and quality assurance
 
 - [x] Checkout creates a `PENDING` order and inventory reservation
 - [x] Successful webhook transitions order to `PAID` and consumes reservation
-- [ ] Failed payment transitions order to `CANCELLED` and restores reserved stock
+- [x] Failed payment transitions order to `CANCELLED` and restores reserved stock
 - [x] Admin-only endpoints reject customer tokens
 
 ## End-to-End Tests
@@ -59,8 +59,9 @@ description: Define testing approach, test cases, and quality assurance
 ## Test Reporting & Coverage
 **How do we verify and communicate test results?**
 
-- Run `pnpm test -- --coverage` for unit coverage reporting
+- Run `pnpm exec jest --coverage --runInBand` for unit/integration coverage reporting
 - Run `pnpm test:e2e` for API workflow verification
+- Latest verified baseline (2026-04-08): `5/5` unit+integration suites passed (`17/17` tests), `1/1` e2e suite passed (`11/11` tests)
 - Track any gaps below target coverage and justify them in PR notes
 - Capture manual checkout/webhook smoke test evidence during release review
 

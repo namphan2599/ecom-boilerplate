@@ -32,6 +32,25 @@ describe('DiscountsService', () => {
     expect(result.finalTotal).toBe(0);
   });
 
+  it('normalizes coupon codes and enforces fixed-amount currency matching', async () => {
+    const normalized = await service.validateAndApplyCoupon({
+      code: ' aura20 ',
+      subtotal: 100,
+      currencyCode: 'usd',
+    });
+
+    expect(normalized.coupon.code).toBe('AURA20');
+    expect(normalized.currencyCode).toBe('USD');
+
+    await expect(
+      service.validateAndApplyCoupon({
+        code: 'SAVE20USD',
+        subtotal: 100,
+        currencyCode: 'EUR',
+      }),
+    ).rejects.toThrow(BadRequestException);
+  });
+
   it('rejects expired, inactive, and usage-capped coupons', async () => {
     await expect(
       service.validateAndApplyCoupon({

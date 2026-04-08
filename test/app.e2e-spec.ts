@@ -320,6 +320,60 @@ describe('AppController (e2e)', () => {
     expect(updateResponse.body.status).toBe('SHIPPED');
   });
 
+  it('/webhooks/stripe (POST) expired checkout marks the order cancelled', async () => {
+    const loginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'customer@aura.local',
+        password: 'Customer123!',
+      })
+      .expect(201);
+
+    const { accessToken } = loginResponse.body;
+
+    await request(app.getHttpServer())
+      .post('/cart/items')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        sku: 'HOODIE-BLK-M',
+        quantity: 1,
+        currencyCode: 'USD',
+      })
+      .expect(201);
+
+    const checkoutResponse = await request(app.getHttpServer())
+      .post('/checkout/session')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({ couponCode: 'ONEUSE' })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/webhooks/stripe')
+      .set('stripe-signature', 'test_signature')
+      .send({
+        id: 'evt_checkout_expired_e2e',
+        type: 'checkout.session.expired',
+        data: {
+          object: {
+            id: checkoutResponse.body.sessionId,
+            metadata: {
+              checkoutToken: checkoutResponse.body.checkoutToken,
+            },
+          },
+        },
+      })
+      .expect(200);
+
+    const ordersResponse = await request(app.getHttpServer())
+      .get('/orders/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    expect(ordersResponse.body.items).toHaveLength(1);
+    expect(ordersResponse.body.items[0].status).toBe('CANCELLED');
+    expect(ordersResponse.body.items[0].paymentStatus).toBe('failed');
+  });
+
   it('/orders/admin (GET) returns the admin fulfillment queue', async () => {
     const customerLogin = await request(app.getHttpServer())
       .post('/auth/login')
