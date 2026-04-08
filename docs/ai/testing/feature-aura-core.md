@@ -23,9 +23,9 @@ description: Define testing approach, test cases, and quality assurance
 - [x] Confirm reservations and prevent double-confirmation
 
 ### Discounts / checkout module
-- [ ] Apply percentage coupon correctly with max-discount rules if configured
-- [ ] Apply fixed-amount coupon without producing negative totals
-- [ ] Reject expired, inactive, or usage-capped coupons
+- [x] Apply percentage coupon correctly with max-discount rules if configured
+- [x] Apply fixed-amount coupon without producing negative totals
+- [x] Reject expired, inactive, or usage-capped coupons
 
 ### Payments module
 - [ ] Accept valid Stripe success event payloads and route to order update logic

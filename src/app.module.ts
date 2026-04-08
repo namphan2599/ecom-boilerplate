@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { CartModule } from './cart/cart.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { RolesGuard } from './common/auth/roles.guard';
+import { DiscountsModule } from './discounts/discounts.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { PaymentsModule } from './payments/payments.module';
 import { PrismaModule } from './prisma/prisma.module';
@@ -33,6 +34,7 @@ import { PrismaModule } from './prisma/prisma.module';
     AuthModule,
     CatalogModule,
     CartModule,
+    DiscountsModule,
     InventoryModule,
     PaymentsModule,
   ],
