@@ -2,6 +2,7 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { Roles } from './common/auth/roles.decorator';
 import { AppRole } from './common/auth/role.enum';
+import { RolesGuard } from './common/auth/roles.guard';
 import { AppService } from './app.service';
 
 @Controller()
@@ -14,7 +15,7 @@ export class AppController {
   }
 
   @Get('admin/summary')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(AppRole.ADMIN)
   getAdminSummary(): { scope: AppRole; capabilities: string[] } {
     return {
@@ -24,7 +25,7 @@ export class AppController {
   }
 
   @Get('me/orders')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(AppRole.CUSTOMER, AppRole.ADMIN)
   getOrderHistoryContext(): { scope: string; resource: string } {
     return {

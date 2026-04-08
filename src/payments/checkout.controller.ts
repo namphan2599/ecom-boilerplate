@@ -11,12 +11,13 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CartService } from '../cart/cart.service';
 import { AppRole } from '../common/auth/role.enum';
 import { Roles } from '../common/auth/roles.decorator';
+import { RolesGuard } from '../common/auth/roles.guard';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { PaymentsService } from './payments.service';
 
 @ApiTags('checkout')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(AppRole.CUSTOMER, AppRole.ADMIN)
 @Controller('checkout')
 export class CheckoutController {

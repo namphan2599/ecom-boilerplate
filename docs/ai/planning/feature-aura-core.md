@@ -10,7 +10,7 @@ description: Break down work into actionable tasks and estimate timeline
 **What are the major checkpoints?**
 
 - [x] Milestone 1: Requirements and architecture documented for `Aura-Core`
-- [ ] Milestone 2: Core domain modules scaffolded with Prisma schema and local infrastructure
+- [x] Milestone 2: Core domain modules scaffolded with Prisma schema and local infrastructure
 - [ ] Milestone 3: Checkout, webhook, and inventory workflows verified with tests and docs
 
 ## Task Breakdown
@@ -28,7 +28,7 @@ description: Break down work into actionable tasks and estimate timeline
 - [x] Task 2.4: Implement inventory reservation, confirmation, and release flows
 - [x] Task 2.5: Implement discount validation and usage limit enforcement
 - [x] Task 2.6: Implement Stripe checkout/session creation and webhook processing
-- [ ] Task 2.7: Implement order history and admin order status management
+- [x] Task 2.7: Implement order history and admin order status management
 
 ### Phase 3: Integration & Polish
 - [ ] Task 3.1: Add OpenAPI docs, example requests, and error response schemas

@@ -38,15 +38,15 @@ description: Define testing approach, test cases, and quality assurance
 - [x] Checkout creates a `PENDING` order and inventory reservation
 - [x] Successful webhook transitions order to `PAID` and consumes reservation
 - [ ] Failed payment transitions order to `CANCELLED` and restores reserved stock
-- [ ] Admin-only endpoints reject customer tokens
+- [x] Admin-only endpoints reject customer tokens
 
 ## End-to-End Tests
 **What user flows need validation?**
 
-- [ ] Admin creates a product with size/color variants and inventory
-- [ ] Customer adds item to cart, applies coupon, and starts checkout
-- [ ] Stripe success webhook updates the order and customer history endpoint reflects the final status
-- [ ] Customer can view only their own orders while admins can view fulfillment queues
+- [x] Admin creates a product with size/color variants and inventory
+- [x] Customer adds item to cart, applies coupon, and starts checkout
+- [x] Stripe success webhook updates the order and customer history endpoint reflects the final status
+- [x] Customer can view only their own orders while admins can view fulfillment queues
 
 ## Test Data
 **What data do we use for testing?**

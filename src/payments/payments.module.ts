@@ -4,12 +4,13 @@ import { CatalogModule } from '../catalog/catalog.module';
 import { DiscountsModule } from '../discounts/discounts.module';
 import { InventoryModule } from '../inventory/inventory.module';
 import { CheckoutController } from './checkout.controller';
+import { OrdersController } from './orders.controller';
 import { PaymentsService } from './payments.service';
 import { StripeWebhookController } from './stripe-webhook.controller';
 
 @Module({
   imports: [CartModule, CatalogModule, DiscountsModule, InventoryModule],
-  controllers: [CheckoutController, StripeWebhookController],
+  controllers: [CheckoutController, OrdersController, StripeWebhookController],
   providers: [PaymentsService],
   exports: [PaymentsService],
 })

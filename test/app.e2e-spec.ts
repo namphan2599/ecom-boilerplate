@@ -191,6 +191,182 @@ describe('AppController (e2e)', () => {
     });
   });
 
+  it('/orders/me (GET) returns only the authenticated customer history', async () => {
+    const loginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'customer@aura.local',
+        password: 'Customer123!',
+      })
+      .expect(201);
+
+    const { accessToken } = loginResponse.body;
+
+    await request(app.getHttpServer())
+      .post('/cart/items')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        sku: 'HOODIE-BLK-M',
+        quantity: 1,
+        currencyCode: 'USD',
+      })
+      .expect(201);
+
+    const checkoutResponse = await request(app.getHttpServer())
+      .post('/checkout/session')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({})
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/webhooks/stripe')
+      .set('stripe-signature', 'test_signature')
+      .send({
+        id: 'evt_order_history_paid',
+        type: 'checkout.session.completed',
+        data: {
+          object: {
+            id: checkoutResponse.body.sessionId,
+            payment_intent: 'pi_history_123',
+            metadata: {
+              checkoutToken: checkoutResponse.body.checkoutToken,
+            },
+          },
+        },
+      })
+      .expect(200);
+
+    const ordersResponse = await request(app.getHttpServer())
+      .get('/orders/me')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    expect(Array.isArray(ordersResponse.body.items)).toBe(true);
+    expect(ordersResponse.body.items).toHaveLength(1);
+    expect(ordersResponse.body.items[0].status).toBe('PAID');
+    expect(ordersResponse.body.items[0].userId).toBe('customer-local');
+  });
+
+  it('/orders/admin/:orderNumber/status (PATCH) allows admin and rejects customers', async () => {
+    const customerLogin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'customer@aura.local',
+        password: 'Customer123!',
+      })
+      .expect(201);
+
+    const customerToken = customerLogin.body.accessToken as string;
+
+    await request(app.getHttpServer())
+      .post('/cart/items')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({
+        sku: 'HOODIE-BLK-M',
+        quantity: 1,
+        currencyCode: 'USD',
+      })
+      .expect(201);
+
+    const checkoutResponse = await request(app.getHttpServer())
+      .post('/checkout/session')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({})
+      .expect(201);
+
+    const orderNumber = checkoutResponse.body.order.orderNumber as string;
+
+    await request(app.getHttpServer())
+      .post('/webhooks/stripe')
+      .set('stripe-signature', 'test_signature')
+      .send({
+        id: 'evt_admin_status_paid',
+        type: 'checkout.session.completed',
+        data: {
+          object: {
+            id: checkoutResponse.body.sessionId,
+            payment_intent: 'pi_admin_status_123',
+            metadata: {
+              checkoutToken: checkoutResponse.body.checkoutToken,
+            },
+          },
+        },
+      })
+      .expect(200);
+
+    await request(app.getHttpServer())
+      .patch(`/orders/admin/${orderNumber}/status`)
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({ status: 'SHIPPED' })
+      .expect(403);
+
+    const adminLogin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'admin@aura.local',
+        password: 'Admin123!',
+      })
+      .expect(201);
+
+    const adminToken = adminLogin.body.accessToken as string;
+
+    const updateResponse = await request(app.getHttpServer())
+      .patch(`/orders/admin/${orderNumber}/status`)
+      .set('Authorization', `Bearer ${adminToken}`)
+      .send({ status: 'SHIPPED' })
+      .expect(200);
+
+    expect(updateResponse.body.orderNumber).toBe(orderNumber);
+    expect(updateResponse.body.status).toBe('SHIPPED');
+  });
+
+  it('/orders/admin (GET) returns the admin fulfillment queue', async () => {
+    const customerLogin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'customer@aura.local',
+        password: 'Customer123!',
+      })
+      .expect(201);
+
+    const customerToken = customerLogin.body.accessToken as string;
+
+    await request(app.getHttpServer())
+      .post('/cart/items')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({
+        sku: 'HOODIE-BLK-M',
+        quantity: 1,
+        currencyCode: 'USD',
+      })
+      .expect(201);
+
+    await request(app.getHttpServer())
+      .post('/checkout/session')
+      .set('Authorization', `Bearer ${customerToken}`)
+      .send({})
+      .expect(201);
+
+    const adminLogin = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'admin@aura.local',
+        password: 'Admin123!',
+      })
+      .expect(201);
+
+    const adminToken = adminLogin.body.accessToken as string;
+
+    const queueResponse = await request(app.getHttpServer())
+      .get('/orders/admin')
+      .set('Authorization', `Bearer ${adminToken}`)
+      .expect(200);
+
+    expect(Array.isArray(queueResponse.body.items)).toBe(true);
+    expect(queueResponse.body.total).toBeGreaterThanOrEqual(1);
+    expect(queueResponse.body.items[0].orderNumber).toMatch(/^AURA-/);
+  });
+
   afterEach(async () => {
     await app.close();
   });

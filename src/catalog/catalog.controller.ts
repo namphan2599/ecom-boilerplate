@@ -17,6 +17,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../common/auth/roles.decorator';
 import { AppRole } from '../common/auth/role.enum';
+import { RolesGuard } from '../common/auth/roles.guard';
 import { CatalogService } from './catalog.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -53,7 +54,7 @@ export class CatalogController {
   }
 
   @Post('admin/products')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(AppRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Create a product as an admin' })
@@ -65,7 +66,7 @@ export class CatalogController {
   }
 
   @Patch('admin/products/:id')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(AppRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a product as an admin' })

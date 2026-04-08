@@ -194,6 +194,61 @@ export class PaymentsService {
     };
   }
 
+  listOrdersForUser(userId: string): { items: CheckoutOrderView[]; total: number } {
+    const items = [...this.fallbackOrders.values()]
+      .filter((order) => order.userId === userId)
+      .sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+
+    return {
+      items,
+      total: items.length,
+    };
+  }
+
+  listAllOrders(): { items: CheckoutOrderView[]; total: number } {
+    const items = [...this.fallbackOrders.values()].sort((left, right) =>
+      right.createdAt.localeCompare(left.createdAt),
+    );
+
+    return {
+      items,
+      total: items.length,
+    };
+  }
+
+  updateOrderStatus(orderNumber: string, status: OrderStatus): CheckoutOrderView {
+    const order = [...this.fallbackOrders.values()].find(
+      (candidate) => candidate.orderNumber === orderNumber,
+    );
+
+    if (!order) {
+      throw new NotFoundException(`Order with number \`${orderNumber}\` was not found.`);
+    }
+
+    if (order.status === status) {
+      return order;
+    }
+
+    this.assertStatusTransition(order.status, status);
+
+    order.status = status;
+    order.updatedAt = new Date().toISOString();
+
+    if (status === OrderStatus.PAID || status === OrderStatus.SHIPPED || status === OrderStatus.DELIVERED) {
+      order.paymentStatus = 'paid';
+    }
+
+    if (status === OrderStatus.CANCELLED) {
+      order.paymentStatus = 'failed';
+    }
+
+    if (status === OrderStatus.REFUNDED) {
+      order.paymentStatus = 'failed';
+    }
+
+    return order;
+  }
+
   getOrderByCheckoutToken(checkoutToken: string): CheckoutOrderView {
     const order = this.fallbackOrders.get(checkoutToken);
 
@@ -390,6 +445,27 @@ export class PaymentsService {
 
     const candidate = payload as Partial<StripeLikeEvent>;
     return !!candidate.id && !!candidate.type && !!candidate.data?.object;
+  }
+
+  private assertStatusTransition(from: OrderStatus, to: OrderStatus): void {
+    const transitions: Record<OrderStatus, OrderStatus[]> = {
+      [OrderStatus.PENDING]: [OrderStatus.PAID, OrderStatus.CANCELLED],
+      [OrderStatus.PAID]: [
+        OrderStatus.SHIPPED,
+        OrderStatus.CANCELLED,
+        OrderStatus.REFUNDED,
+      ],
+      [OrderStatus.SHIPPED]: [OrderStatus.DELIVERED, OrderStatus.REFUNDED],
+      [OrderStatus.DELIVERED]: [OrderStatus.REFUNDED],
+      [OrderStatus.CANCELLED]: [],
+      [OrderStatus.REFUNDED]: [],
+    };
+
+    if (!transitions[from].includes(to)) {
+      throw new BadRequestException(
+        `Invalid order status transition from \`${from}\` to \`${to}\`.`,
+      );
+    }
   }
 
   private nextOrderNumber(): string {
