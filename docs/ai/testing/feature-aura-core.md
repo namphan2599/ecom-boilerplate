@@ -28,15 +28,15 @@ description: Define testing approach, test cases, and quality assurance
 - [x] Reject expired, inactive, or usage-capped coupons
 
 ### Payments module
-- [ ] Accept valid Stripe success event payloads and route to order update logic
-- [ ] Ignore duplicate webhook event IDs idempotently
-- [ ] Handle payment failure events by cancelling the order and releasing reservation
+- [x] Accept valid Stripe success event payloads and route to order update logic
+- [x] Ignore duplicate webhook event IDs idempotently
+- [x] Handle payment failure events by cancelling the order and releasing reservation
 
 ## Integration Tests
 **How do we test component interactions?**
 
-- [ ] Checkout creates a `PENDING` order and inventory reservation
-- [ ] Successful webhook transitions order to `PAID` and consumes reservation
+- [x] Checkout creates a `PENDING` order and inventory reservation
+- [x] Successful webhook transitions order to `PAID` and consumes reservation
 - [ ] Failed payment transitions order to `CANCELLED` and restores reserved stock
 - [ ] Admin-only endpoints reject customer tokens
 

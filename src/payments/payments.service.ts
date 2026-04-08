@@ -1,4 +1,15 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
+import { OrderStatus } from '@prisma/client';
+import { randomUUID } from 'node:crypto';
+import type { AuthenticatedUser } from '../auth/auth.service';
+import { type CartView } from '../cart/cart.service';
+import { CatalogService } from '../catalog/catalog.service';
+import { DiscountsService } from '../discounts/discounts.service';
 import { InventoryService } from '../inventory/inventory.service';
 
 export interface StripeLikeEvent {
@@ -9,12 +20,191 @@ export interface StripeLikeEvent {
   };
 }
 
+export interface CreateCheckoutSessionInput {
+  customer: AuthenticatedUser;
+  cart: CartView;
+  couponCode?: string;
+  successUrl?: string;
+  cancelUrl?: string;
+}
+
+export interface CheckoutOrderView {
+  orderNumber: string;
+  checkoutToken: string;
+  userId: string;
+  customerEmail: string;
+  customerName?: string;
+  status: OrderStatus;
+  paymentStatus: 'requires_payment' | 'paid' | 'failed';
+  currencyCode: string;
+  subtotal: number;
+  discountTotal: number;
+  taxTotal: number;
+  shippingTotal: number;
+  grandTotal: number;
+  couponCode?: string;
+  stripeCheckoutSessionId: string;
+  stripePaymentIntentId?: string;
+  items: CartView['items'];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface HostedCheckoutSessionView {
+  provider: 'stripe' | 'mock-stripe';
+  checkoutToken: string;
+  sessionId: string;
+  checkoutUrl: string;
+  successUrl: string;
+  cancelUrl: string;
+  expiresAt: string;
+  order: CheckoutOrderView;
+}
+
 @Injectable()
 export class PaymentsService {
   private readonly logger = new Logger(PaymentsService.name);
   private readonly processedEventIds = new Set<string>();
+  private readonly fallbackOrders = new Map<string, CheckoutOrderView>();
+  private readonly sessionIndex = new Map<string, string>();
+  private orderSequence = 0;
 
-  constructor(private readonly inventoryService: InventoryService) {}
+  constructor(
+    private readonly inventoryService: InventoryService,
+    private readonly discountsService: DiscountsService,
+    private readonly catalogService?: CatalogService,
+  ) {}
+
+  async createCheckoutSession(
+    input: CreateCheckoutSessionInput,
+  ): Promise<HostedCheckoutSessionView> {
+    if (input.cart.items.length === 0) {
+      throw new BadRequestException(
+        'Cannot create a checkout session for an empty cart.',
+      );
+    }
+
+    const currencyCode = input.cart.summary.currencyCode.toUpperCase();
+    const mixedCurrency = input.cart.items.some(
+      (item) => item.currencyCode.toUpperCase() !== currencyCode,
+    );
+
+    if (mixedCurrency) {
+      throw new BadRequestException(
+        'All checkout items must share the same currency.',
+      );
+    }
+
+    const couponApplication = input.couponCode
+      ? await this.discountsService.validateAndApplyCoupon({
+          code: input.couponCode,
+          subtotal: input.cart.summary.subtotal,
+          currencyCode,
+        })
+      : null;
+
+    const checkoutToken = `chk_${randomUUID().replace(/-/g, '')}`;
+
+    try {
+      for (const item of input.cart.items) {
+        await this.ensureInventorySeeded(item.sku, item.currencyCode);
+        this.inventoryService.reserveStock({
+          checkoutToken,
+          sku: item.sku,
+          quantity: item.quantity,
+        });
+      }
+
+      if (couponApplication) {
+        await this.discountsService.markCouponUsed(couponApplication.coupon.code);
+      }
+    } catch (error) {
+      try {
+        this.inventoryService.releaseReservation(checkoutToken);
+      } catch {
+        // noop rollback guard
+      }
+
+      if (couponApplication) {
+        await this.discountsService
+          .releaseCouponUsage(couponApplication.coupon.code)
+          .catch(() => undefined);
+      }
+
+      throw error;
+    }
+
+    const sessionId = `cs_test_${randomUUID().replace(/-/g, '').slice(0, 24)}`;
+    const subtotal = this.roundCurrency(input.cart.summary.subtotal);
+    const discountTotal = this.roundCurrency(
+      couponApplication?.discountAmount ?? 0,
+    );
+    const taxableSubtotal = this.roundCurrency(
+      Math.max(subtotal - discountTotal, 0),
+    );
+    const shippingTotal = this.roundCurrency(taxableSubtotal >= 100 ? 0 : 9.99);
+    const taxTotal = this.roundCurrency(taxableSubtotal * 0.08);
+    const grandTotal = this.roundCurrency(
+      taxableSubtotal + shippingTotal + taxTotal,
+    );
+    const timestamp = new Date().toISOString();
+
+    const order: CheckoutOrderView = {
+      orderNumber: this.nextOrderNumber(),
+      checkoutToken,
+      userId: input.customer.userId,
+      customerEmail: input.customer.email,
+      customerName: input.customer.displayName,
+      status: OrderStatus.PENDING,
+      paymentStatus: 'requires_payment',
+      currencyCode,
+      subtotal,
+      discountTotal,
+      taxTotal,
+      shippingTotal,
+      grandTotal,
+      couponCode: couponApplication?.coupon.code,
+      stripeCheckoutSessionId: sessionId,
+      items: input.cart.items.map((item) => ({ ...item })),
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    };
+
+    this.fallbackOrders.set(checkoutToken, order);
+    this.sessionIndex.set(sessionId, checkoutToken);
+
+    const successUrl =
+      input.successUrl ??
+      process.env.CHECKOUT_SUCCESS_URL ??
+      'https://storefront.aura.local/checkout/success';
+    const cancelUrl =
+      input.cancelUrl ??
+      process.env.CHECKOUT_CANCEL_URL ??
+      'https://storefront.aura.local/checkout/cancel';
+
+    return {
+      provider: process.env.STRIPE_SECRET_KEY ? 'stripe' : 'mock-stripe',
+      checkoutToken,
+      sessionId,
+      checkoutUrl: `https://checkout.stripe.com/c/pay/${sessionId}`,
+      successUrl,
+      cancelUrl,
+      expiresAt: new Date(Date.now() + 30 * 60_000).toISOString(),
+      order,
+    };
+  }
+
+  getOrderByCheckoutToken(checkoutToken: string): CheckoutOrderView {
+    const order = this.fallbackOrders.get(checkoutToken);
+
+    if (!order) {
+      throw new NotFoundException(
+        `No checkout order found for token \`${checkoutToken}\`.`,
+      );
+    }
+
+    return order;
+  }
 
   /**
    * Replace this lightweight validation with stripe.webhooks.constructEvent()
@@ -35,7 +225,9 @@ export class PaymentsService {
     return input.payload;
   }
 
-  handleWebhookEvent(event: StripeLikeEvent): void {
+  async handleWebhookEvent(
+    event: StripeLikeEvent,
+  ): Promise<CheckoutOrderView | void> {
     if (this.processedEventIds.has(event.id)) {
       this.logger.warn(`Ignoring duplicate Stripe event ${event.id}.`);
       return;
@@ -46,13 +238,11 @@ export class PaymentsService {
     switch (event.type) {
       case 'payment_intent.succeeded':
       case 'checkout.session.completed':
-        this.handlePaymentSucceeded(event.data.object);
-        return;
+        return this.handlePaymentSucceeded(event.data.object);
 
       case 'payment_intent.payment_failed':
       case 'checkout.session.expired':
-        this.handlePaymentFailed(event.data.object);
-        return;
+        return this.handlePaymentFailed(event.data.object);
 
       case 'charge.refunded':
         this.logger.warn(
@@ -65,28 +255,117 @@ export class PaymentsService {
     }
   }
 
-  private handlePaymentSucceeded(payload: Record<string, unknown>): void {
-    const checkoutToken = this.getCheckoutToken(payload);
+  private async handlePaymentSucceeded(
+    payload: Record<string, unknown>,
+  ): Promise<CheckoutOrderView | void> {
+    const order = this.findOrderFromPayload(payload);
 
-    if (checkoutToken) {
-      this.inventoryService.confirmReservation(checkoutToken);
+    if (!order) {
+      this.logger.warn('Payment success webhook received without a known checkout token.');
+      return;
+    }
+
+    if (order.status !== OrderStatus.PAID) {
+      this.inventoryService.confirmReservation(order.checkoutToken);
+      order.status = OrderStatus.PAID;
+      order.paymentStatus = 'paid';
+      order.updatedAt = new Date().toISOString();
+
+      if (typeof payload.id === 'string') {
+        order.stripeCheckoutSessionId = payload.id;
+      }
+
+      if (typeof payload.payment_intent === 'string') {
+        order.stripePaymentIntentId = payload.payment_intent;
+      }
     }
 
     this.logger.log(
-      `Payment succeeded for checkout token: ${checkoutToken ?? 'unknown'}`,
+      `Payment succeeded for checkout token: ${order.checkoutToken}`,
     );
+
+    return order;
   }
 
-  private handlePaymentFailed(payload: Record<string, unknown>): void {
-    const checkoutToken = this.getCheckoutToken(payload);
+  private async handlePaymentFailed(
+    payload: Record<string, unknown>,
+  ): Promise<CheckoutOrderView | void> {
+    const order = this.findOrderFromPayload(payload);
 
-    if (checkoutToken) {
-      this.inventoryService.releaseReservation(checkoutToken);
+    if (!order) {
+      this.logger.warn('Payment failure webhook received without a known checkout token.');
+      return;
+    }
+
+    if (order.status !== OrderStatus.CANCELLED) {
+      this.inventoryService.releaseReservation(order.checkoutToken);
+
+      if (order.couponCode) {
+        await this.discountsService.releaseCouponUsage(order.couponCode);
+      }
+
+      order.status = OrderStatus.CANCELLED;
+      order.paymentStatus = 'failed';
+      order.updatedAt = new Date().toISOString();
+
+      if (typeof payload.id === 'string') {
+        order.stripeCheckoutSessionId = payload.id;
+      }
     }
 
     this.logger.warn(
-      `Payment failed for checkout token: ${checkoutToken ?? 'unknown'}`,
+      `Payment failed for checkout token: ${order.checkoutToken}`,
     );
+
+    return order;
+  }
+
+  private async ensureInventorySeeded(
+    sku: string,
+    currencyCode: string,
+  ): Promise<void> {
+    try {
+      this.inventoryService.getSnapshot(sku);
+      return;
+    } catch (error) {
+      if (!(error instanceof NotFoundException)) {
+        throw error;
+      }
+    }
+
+    if (!this.catalogService) {
+      throw new NotFoundException(`No inventory record found for SKU \`${sku}\`.`);
+    }
+
+    const variant = await this.catalogService.resolveVariantSnapshot(
+      sku,
+      currencyCode,
+    );
+
+    this.inventoryService.seed([
+      {
+        sku: variant.sku,
+        onHand: variant.inventoryOnHand,
+        reserved: variant.inventoryReserved,
+      },
+    ]);
+  }
+
+  private findOrderFromPayload(
+    payload: Record<string, unknown>,
+  ): CheckoutOrderView | undefined {
+    const checkoutToken = this.getCheckoutToken(payload);
+
+    if (checkoutToken) {
+      return this.fallbackOrders.get(checkoutToken);
+    }
+
+    const sessionId = typeof payload.id === 'string' ? payload.id : undefined;
+    const tokenFromSession = sessionId ? this.sessionIndex.get(sessionId) : undefined;
+
+    return tokenFromSession
+      ? this.fallbackOrders.get(tokenFromSession)
+      : undefined;
   }
 
   private getCheckoutToken(
@@ -111,5 +390,14 @@ export class PaymentsService {
 
     const candidate = payload as Partial<StripeLikeEvent>;
     return !!candidate.id && !!candidate.type && !!candidate.data?.object;
+  }
+
+  private nextOrderNumber(): string {
+    this.orderSequence += 1;
+    return `AURA-${String(this.orderSequence).padStart(6, '0')}`;
+  }
+
+  private roundCurrency(value: number): number {
+    return Number(value.toFixed(2));
   }
 }

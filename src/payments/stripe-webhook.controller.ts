@@ -15,10 +15,10 @@ export class StripeWebhookController {
 
   @Post()
   @HttpCode(200)
-  handleStripeWebhook(
+  async handleStripeWebhook(
     @Headers('stripe-signature') signature: string | undefined,
     @Req() req: Request,
-  ): { received: boolean; type: string } {
+  ): Promise<{ received: boolean; type: string }> {
     if (!signature) {
       throw new BadRequestException('Missing `stripe-signature` header.');
     }
@@ -31,7 +31,7 @@ export class StripeWebhookController {
       payload,
     });
 
-    this.paymentsService.handleWebhookEvent(event);
+    await this.paymentsService.handleWebhookEvent(event);
 
     return {
       received: true,

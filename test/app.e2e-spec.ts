@@ -132,6 +132,65 @@ describe('AppController (e2e)', () => {
     expect(cartResponse.body.summary.subtotal).toBe(159.98);
   });
 
+  it('/checkout/session (POST) creates a hosted session and accepts a Stripe webhook', async () => {
+    const loginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'customer@aura.local',
+        password: 'Customer123!',
+      })
+      .expect(201);
+
+    const { accessToken } = loginResponse.body;
+
+    await request(app.getHttpServer())
+      .post('/cart/items')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        sku: 'HOODIE-BLK-M',
+        quantity: 1,
+        currencyCode: 'USD',
+      })
+      .expect(201);
+
+    const checkoutResponse = await request(app.getHttpServer())
+      .post('/checkout/session')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        couponCode: 'AURA20',
+        successUrl: 'https://storefront.aura.local/success',
+        cancelUrl: 'https://storefront.aura.local/cancel',
+      })
+      .expect(201);
+
+    expect(checkoutResponse.body.sessionId).toMatch(/^cs_test_/);
+    expect(checkoutResponse.body.order.status).toBe('PENDING');
+    expect(checkoutResponse.body.order.currencyCode).toBe('USD');
+
+    const webhookResponse = await request(app.getHttpServer())
+      .post('/webhooks/stripe')
+      .set('stripe-signature', 'test_signature')
+      .send({
+        id: 'evt_checkout_completed_e2e',
+        type: 'checkout.session.completed',
+        data: {
+          object: {
+            id: checkoutResponse.body.sessionId,
+            payment_intent: 'pi_e2e_123',
+            metadata: {
+              checkoutToken: checkoutResponse.body.checkoutToken,
+            },
+          },
+        },
+      })
+      .expect(200);
+
+    expect(webhookResponse.body).toEqual({
+      received: true,
+      type: 'checkout.session.completed',
+    });
+  });
+
   afterEach(async () => {
     await app.close();
   });
