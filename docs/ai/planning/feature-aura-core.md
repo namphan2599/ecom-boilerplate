@@ -22,7 +22,7 @@ description: Break down work into actionable tasks and estimate timeline
 - [x] Task 1.3: Set up auth baseline with JWT, Passport, and role decorators/guards
 
 ### Phase 2: Core Features
-- [ ] Task 2.1: Model `User`, `Product`, `Category`, `Tag`, `ProductVariant`, `Coupon`, `Order`, and `OrderItem` in Prisma
+- [x] Task 2.1: Model `User`, `Product`, `Category`, `Tag`, `ProductVariant`, `Coupon`, `Order`, and `OrderItem` in Prisma
 - [ ] Task 2.2: Implement catalog CRUD and admin-only product management
 - [ ] Task 2.3: Implement Redis-backed cart persistence and cart pricing snapshot logic
 - [ ] Task 2.4: Implement inventory reservation, confirmation, and release flows
