@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, ProductStatus} from '@prisma/client';
+import { Prisma, ProductStatus } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateProductDto, ProductVariantDto } from './dto/create-product.dto';
@@ -46,6 +46,20 @@ export interface CatalogProductView {
       compareAtAmount?: number | null;
     }>;
   }>;
+}
+
+export interface CatalogVariantSnapshot {
+  productId: string;
+  variantId: string;
+  productName: string;
+  variantName: string;
+  sku: string;
+  attributes: Record<string, string>;
+  currencyCode: string;
+  unitPrice: number;
+  compareAtAmount?: number | null;
+  inventoryOnHand: number;
+  inventoryReserved: number;
 }
 
 @Injectable()
@@ -183,6 +197,70 @@ export class CatalogService {
     const product = this.createFallbackProduct(input);
     this.fallbackProducts.set(product.id, product);
     return product;
+  }
+
+  async resolveVariantSnapshot(
+    sku: string,
+    currencyCode: string,
+  ): Promise<CatalogVariantSnapshot> {
+    const normalizedCurrency = currencyCode.toUpperCase();
+
+    if (this.prisma.isReady()) {
+      const variant = await this.prisma.productVariant.findUnique({
+        where: { sku },
+        include: {
+          product: true,
+          prices: true,
+        },
+      });
+
+      if (!variant) {
+        throw new NotFoundException(`Variant with SKU \`${sku}\` was not found.`);
+      }
+
+      const price = this.selectPrice(variant.prices, normalizedCurrency);
+
+      return {
+        productId: variant.productId,
+        variantId: variant.id,
+        productName: variant.product.name,
+        variantName: variant.title,
+        sku: variant.sku,
+        attributes: variant.attributes as Record<string, string>,
+        currencyCode: price.currencyCode,
+        unitPrice: Number(price.amount),
+        compareAtAmount:
+          price.compareAtAmount !== null && price.compareAtAmount !== undefined
+            ? Number(price.compareAtAmount)
+            : null,
+        inventoryOnHand: variant.inventoryOnHand,
+        inventoryReserved: variant.inventoryReserved,
+      };
+    }
+
+    for (const product of this.fallbackProducts.values()) {
+      const variant = product.variants.find((item) => item.sku === sku);
+      if (!variant) {
+        continue;
+      }
+
+      const price = this.selectPrice(variant.prices, normalizedCurrency);
+      return {
+        productId: product.id,
+        variantId: variant.id,
+        productName: product.name,
+        variantName: variant.title,
+        sku: variant.sku,
+        attributes: variant.attributes,
+        currencyCode: price.currencyCode,
+        unitPrice: price.amount,
+        compareAtAmount: price.compareAtAmount ?? null,
+        inventoryOnHand: variant.inventoryOnHand,
+        inventoryReserved: variant.inventoryReserved,
+      };
+    }
+
+    throw new NotFoundException(`Variant with SKU \`${sku}\` was not found.`);
   }
 
   async updateProduct(
@@ -356,6 +434,27 @@ export class CatalogService {
           }
         : undefined,
     };
+  }
+
+  private selectPrice<T extends { currencyCode: string }>(
+    prices: T[],
+    currencyCode: string,
+  ): T {
+    const normalizedCurrency = currencyCode.toUpperCase();
+    const price =
+      prices.find(
+        (candidate) => candidate.currencyCode.toUpperCase() === normalizedCurrency,
+      ) ??
+      prices.find((candidate) => candidate.currencyCode.toUpperCase() === 'USD') ??
+      prices[0];
+
+    if (!price) {
+      throw new NotFoundException(
+        `No catalog price exists for currency \`${normalizedCurrency}\`.`,
+      );
+    }
+
+    return price;
   }
 
   private toView(product: ProductWithRelations): CatalogProductView {

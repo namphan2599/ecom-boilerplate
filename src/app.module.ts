@@ -4,6 +4,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { CartModule } from './cart/cart.module';
 import { CatalogModule } from './catalog/catalog.module';
 import { RolesGuard } from './common/auth/roles.guard';
 import { InventoryModule } from './inventory/inventory.module';
@@ -31,6 +32,7 @@ import { PrismaModule } from './prisma/prisma.module';
     PrismaModule,
     AuthModule,
     CatalogModule,
+    CartModule,
     InventoryModule,
     PaymentsModule,
   ],

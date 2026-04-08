@@ -91,6 +91,47 @@ describe('AppController (e2e)', () => {
     expect(createResponse.body.variants).toHaveLength(1);
   });
 
+  it('/cart (GET) rejects anonymous users', () => {
+    return request(app.getHttpServer()).get('/cart').expect(401);
+  });
+
+  it('/cart/items (POST) stores an authenticated cart snapshot', async () => {
+    const loginResponse = await request(app.getHttpServer())
+      .post('/auth/login')
+      .send({
+        email: 'customer@aura.local',
+        password: 'Customer123!',
+      })
+      .expect(201);
+
+    const { accessToken } = loginResponse.body;
+
+    const addResponse = await request(app.getHttpServer())
+      .post('/cart/items')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .send({
+        sku: 'HOODIE-BLK-M',
+        quantity: 2,
+        currencyCode: 'USD',
+      })
+      .expect(201);
+
+    expect(addResponse.body.items).toHaveLength(1);
+    expect(addResponse.body.items[0].sku).toBe('HOODIE-BLK-M');
+    expect(addResponse.body.items[0].quantity).toBe(2);
+    expect(addResponse.body.summary.currencyCode).toBe('USD');
+    expect(addResponse.body.summary.itemCount).toBe(2);
+
+    const cartResponse = await request(app.getHttpServer())
+      .get('/cart')
+      .set('Authorization', `Bearer ${accessToken}`)
+      .expect(200);
+
+    expect(cartResponse.body.items).toHaveLength(1);
+    expect(cartResponse.body.items[0].unitPrice).toBe(79.99);
+    expect(cartResponse.body.summary.subtotal).toBe(159.98);
+  });
+
   afterEach(async () => {
     await app.close();
   });
