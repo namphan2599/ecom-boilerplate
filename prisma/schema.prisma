@@ -222,7 +222,7 @@ model OrderItem {
 
 model InventoryReservation {
   id            String            @id @default(cuid())
-  checkoutToken String            @unique
+  checkoutToken String
   orderId       String?
   order         Order?            @relation(fields: [orderId], references: [id])
   variantId     String
@@ -235,6 +235,8 @@ model InventoryReservation {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
+  @@unique([checkoutToken, variantId])
+  @@index([checkoutToken])
   @@index([variantId, status])
   @@index([orderId])
 }

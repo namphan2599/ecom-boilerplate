@@ -19,6 +19,8 @@ export interface InventoryReservation {
   quantity: number;
   status: 'ACTIVE' | 'CONFIRMED' | 'RELEASED';
   expiresAt: Date;
+  confirmedAt?: Date;
+  releasedAt?: Date;
 }
 
 export interface ReserveStockInput {
@@ -66,6 +68,20 @@ export class InventoryService {
     return snapshot;
   }
 
+  listReservationsForCheckout(checkoutToken: string): InventoryReservation[] {
+    const reservations = [...this.reservations.values()]
+      .filter((reservation) => reservation.checkoutToken === checkoutToken)
+      .sort((left, right) => left.sku.localeCompare(right.sku));
+
+    if (reservations.length === 0) {
+      throw new NotFoundException(
+        `No inventory reservation found for checkout \`${checkoutToken}\`.`,
+      );
+    }
+
+    return reservations;
+  }
+
   assertAvailable(sku: string, quantity: number): InventorySnapshot {
     this.assertPositiveQuantity(quantity);
 
@@ -83,12 +99,24 @@ export class InventoryService {
 
   reserveStock(input: ReserveStockInput): InventoryReservation {
     this.assertPositiveQuantity(input.quantity);
-    this.assertAvailable(input.sku, input.quantity);
 
-    const existingReservation = this.reservations.get(input.checkoutToken);
+    const reservationKey = this.getReservationKey(
+      input.checkoutToken,
+      input.sku,
+    );
+    const existingReservation = this.reservations.get(reservationKey);
+
     if (existingReservation && existingReservation.status !== 'RELEASED') {
+      if (existingReservation.quantity !== input.quantity) {
+        throw new ConflictException(
+          `Checkout \`${input.checkoutToken}\` already has a reservation for SKU \`${input.sku}\`.`,
+        );
+      }
+
       return existingReservation;
     }
+
+    this.assertAvailable(input.sku, input.quantity);
 
     const snapshot = this.getSnapshot(input.sku);
     snapshot.reserved += input.quantity;
@@ -102,7 +130,7 @@ export class InventoryService {
       expiresAt: new Date(Date.now() + (input.ttlMinutes ?? 15) * 60_000),
     };
 
-    this.reservations.set(input.checkoutToken, reservation);
+    this.reservations.set(reservationKey, reservation);
     this.logger.log(
       `Reserved ${input.quantity} unit(s) of ${input.sku} for checkout ${input.checkoutToken}.`,
     );
@@ -111,49 +139,93 @@ export class InventoryService {
   }
 
   confirmReservation(checkoutToken: string): InventoryReservation {
-    const reservation = this.getReservation(checkoutToken);
+    const reservations = this.listReservationsForCheckout(checkoutToken);
+    const activeReservations = reservations.filter(
+      (reservation) => reservation.status === 'ACTIVE',
+    );
 
-    if (reservation.status === 'CONFIRMED') {
-      return reservation;
+    if (activeReservations.length === 0) {
+      return reservations[0];
     }
 
-    if (reservation.expiresAt.getTime() < Date.now()) {
+    const expiredReservation = activeReservations.find(
+      (reservation) => reservation.expiresAt.getTime() < Date.now(),
+    );
+
+    if (expiredReservation) {
       this.releaseReservation(checkoutToken);
       throw new ConflictException(
         `Reservation for checkout \`${checkoutToken}\` has expired.`,
       );
     }
 
-    const snapshot = this.getSnapshot(reservation.sku);
-    snapshot.reserved = Math.max(snapshot.reserved - reservation.quantity, 0);
-    snapshot.onHand = Math.max(snapshot.onHand - reservation.quantity, 0);
-    snapshot.updatedAt = new Date();
+    const timestamp = new Date();
 
-    reservation.status = 'CONFIRMED';
+    for (const reservation of activeReservations) {
+      const snapshot = this.getSnapshot(reservation.sku);
+      snapshot.reserved = Math.max(snapshot.reserved - reservation.quantity, 0);
+      snapshot.onHand = Math.max(snapshot.onHand - reservation.quantity, 0);
+      snapshot.updatedAt = timestamp;
+
+      reservation.status = 'CONFIRMED';
+      reservation.confirmedAt = timestamp;
+      reservation.releasedAt = undefined;
+    }
+
     this.logger.log(
-      `Confirmed inventory reservation for checkout ${checkoutToken}.`,
+      `Confirmed ${activeReservations.length} inventory reservation(s) for checkout ${checkoutToken}.`,
     );
 
-    return reservation;
+    return reservations[0];
   }
 
   releaseReservation(checkoutToken: string): InventoryReservation {
-    const reservation = this.getReservation(checkoutToken);
-
-    if (reservation.status === 'RELEASED') {
-      return reservation;
-    }
-
-    const snapshot = this.getSnapshot(reservation.sku);
-    snapshot.reserved = Math.max(snapshot.reserved - reservation.quantity, 0);
-    snapshot.updatedAt = new Date();
-
-    reservation.status = 'RELEASED';
-    this.logger.warn(
-      `Released inventory reservation for checkout ${checkoutToken}.`,
+    const reservations = this.listReservationsForCheckout(checkoutToken);
+    const releasableReservations = reservations.filter(
+      (reservation) => reservation.status === 'ACTIVE',
     );
 
-    return reservation;
+    if (releasableReservations.length === 0) {
+      return reservations[0];
+    }
+
+    const timestamp = new Date();
+
+    for (const reservation of releasableReservations) {
+      const snapshot = this.getSnapshot(reservation.sku);
+      snapshot.reserved = Math.max(snapshot.reserved - reservation.quantity, 0);
+      snapshot.updatedAt = timestamp;
+
+      reservation.status = 'RELEASED';
+      reservation.releasedAt = timestamp;
+    }
+
+    this.logger.warn(
+      `Released ${releasableReservations.length} inventory reservation(s) for checkout ${checkoutToken}.`,
+    );
+
+    return reservations[0];
+  }
+
+  releaseExpiredReservations(referenceTime: Date = new Date()): InventoryReservation[] {
+    const expiredReservations = [...this.reservations.values()].filter(
+      (reservation) =>
+        reservation.status === 'ACTIVE' &&
+        reservation.expiresAt.getTime() <= referenceTime.getTime(),
+    );
+
+    const processedTokens = new Set<string>();
+
+    for (const reservation of expiredReservations) {
+      if (processedTokens.has(reservation.checkoutToken)) {
+        continue;
+      }
+
+      this.releaseReservation(reservation.checkoutToken);
+      processedTokens.add(reservation.checkoutToken);
+    }
+
+    return expiredReservations;
   }
 
   adjustOnHand(sku: string, delta: number, reason: string): InventorySnapshot {
@@ -177,16 +249,8 @@ export class InventoryService {
     return snapshot;
   }
 
-  private getReservation(checkoutToken: string): InventoryReservation {
-    const reservation = this.reservations.get(checkoutToken);
-
-    if (!reservation) {
-      throw new NotFoundException(
-        `No inventory reservation found for checkout \`${checkoutToken}\`.`,
-      );
-    }
-
-    return reservation;
+  private getReservationKey(checkoutToken: string, sku: string): string {
+    return `${checkoutToken}:${sku}`;
   }
 
   private getSellableQuantity(snapshot: InventorySnapshot): number {

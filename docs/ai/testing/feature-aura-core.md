@@ -17,10 +17,10 @@ description: Define testing approach, test cases, and quality assurance
 **What individual components need testing?**
 
 ### Inventory module
-- [ ] Reserve stock when sellable quantity is sufficient
-- [ ] Reject reservation when requested quantity exceeds sellable stock
-- [ ] Release reservations back to inventory on checkout failure or timeout
-- [ ] Confirm reservations and prevent double-confirmation
+- [x] Reserve stock when sellable quantity is sufficient
+- [x] Reject reservation when requested quantity exceeds sellable stock
+- [x] Release reservations back to inventory on checkout failure or timeout
+- [x] Confirm reservations and prevent double-confirmation
 
 ### Discounts / checkout module
 - [ ] Apply percentage coupon correctly with max-discount rules if configured
