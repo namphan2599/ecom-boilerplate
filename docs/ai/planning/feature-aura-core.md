@@ -33,7 +33,7 @@ description: Break down work into actionable tasks and estimate timeline
 ### Phase 3: Integration & Polish
 - [x] Task 3.1: Add OpenAPI docs, example requests, and error response schemas
 - [x] Task 3.2: Add unit, integration, and e2e tests for critical commerce flows
-- [ ] Task 3.3: Add observability hooks, health checks, and deployment notes
+- [x] Task 3.3: Add observability hooks, health checks, and deployment notes
 
 ## Dependencies
 **What needs to happen in what order?**

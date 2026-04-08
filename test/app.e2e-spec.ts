@@ -32,6 +32,24 @@ describe('AppController (e2e)', () => {
     expect(Array.isArray(response.body.items)).toBe(true);
   });
 
+  it('/health/live and /health/ready (GET) expose observability probes', async () => {
+    const liveResponse = await request(app.getHttpServer())
+      .get('/health/live')
+      .expect(200);
+
+    expect(liveResponse.body.status).toBe('ok');
+    expect(liveResponse.body.service).toBeDefined();
+
+    const readyResponse = await request(app.getHttpServer())
+      .get('/health/ready')
+      .expect(200);
+
+    expect(['ok', 'degraded']).toContain(readyResponse.body.status);
+    expect(readyResponse.body.checks.database).toBeDefined();
+    expect(readyResponse.body.checks.cache).toBeDefined();
+    expect(readyResponse.body.checks.runtime.status).toBe('up');
+  });
+
   it('/catalog/admin/products (POST) rejects anonymous users', () => {
     return request(app.getHttpServer())
       .post('/catalog/admin/products')

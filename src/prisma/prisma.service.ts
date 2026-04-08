@@ -46,6 +46,48 @@ export class PrismaService
     return this.isConnected;
   }
 
+  async getHealthStatus(): Promise<{
+    status: 'up' | 'down';
+    provider: 'prisma';
+    detail: string;
+    latencyMs?: number;
+  }> {
+    if (!process.env.DATABASE_URL) {
+      return {
+        status: 'down',
+        provider: 'prisma',
+        detail: 'DATABASE_URL is not configured; running in fallback mode.',
+      };
+    }
+
+    if (!this.isConnected) {
+      return {
+        status: 'down',
+        provider: 'prisma',
+        detail: 'Prisma is not connected to the configured database.',
+      };
+    }
+
+    const startedAt = Date.now();
+
+    try {
+      await this.$queryRaw`SELECT 1`;
+
+      return {
+        status: 'up',
+        provider: 'prisma',
+        detail: 'Database connection is healthy.',
+        latencyMs: Date.now() - startedAt,
+      };
+    } catch (error) {
+      return {
+        status: 'down',
+        provider: 'prisma',
+        detail: `Database health probe failed: ${error instanceof Error ? error.message : 'unknown error'}`,
+      };
+    }
+  }
+
   enableShutdownHooks(app: INestApplication): void {
     process.on('beforeExit', () => {
       void app.close();

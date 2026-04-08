@@ -189,6 +189,43 @@ export class CartService implements OnModuleInit, OnModuleDestroy {
     return this.persistCart(cart);
   }
 
+  async getPersistenceHealth(): Promise<{
+    status: 'up' | 'degraded';
+    provider: 'redis' | 'memory';
+    detail: string;
+    ttlSeconds: number;
+    latencyMs?: number;
+  }> {
+    if (this.redisReady && this.redisClient) {
+      const startedAt = Date.now();
+
+      try {
+        await this.redisClient.ping();
+
+        return {
+          status: 'up',
+          provider: 'redis',
+          detail: 'Redis cart persistence is connected and responding.',
+          ttlSeconds: this.cartTtlSeconds,
+          latencyMs: Date.now() - startedAt,
+        };
+      } catch (error) {
+        this.logger.warn(
+          `Redis ping failed during health check: ${error instanceof Error ? error.message : 'unknown error'}`,
+        );
+      }
+    }
+
+    return {
+      status: 'degraded',
+      provider: 'memory',
+      detail: process.env.REDIS_URL
+        ? 'Redis is unavailable; in-memory cart persistence fallback is active.'
+        : 'REDIS_URL is not configured; in-memory cart persistence fallback is active.',
+      ttlSeconds: this.cartTtlSeconds,
+    };
+  }
+
   private async loadCart(
     userId: string,
     currencyCode: string,
