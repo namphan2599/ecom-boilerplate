@@ -10,13 +10,20 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Request } from 'express';
+import {
+  ApiErrorResponseDto,
+  ValidationErrorResponseDto,
+} from '../common/http/api-error-response.dto';
 import type { AuthenticatedUser } from '../auth/auth.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AppRole } from '../common/auth/role.enum';
@@ -36,14 +43,56 @@ export class CartController {
 
   @Get()
   @ApiOperation({ summary: 'Get the authenticated user cart' })
-  @ApiOkResponse({ description: 'Returns the persistent cart snapshot.' })
+  @ApiOkResponse({
+    description: 'Returns the persistent cart snapshot.',
+    schema: {
+      example: {
+        userId: 'customer-local',
+        items: [
+          {
+            sku: 'HOODIE-BLK-M',
+            productName: 'Aura Signature Hoodie',
+            quantity: 2,
+            currencyCode: 'USD',
+            unitPrice: 79.99,
+            lineTotal: 159.98,
+          },
+        ],
+        summary: {
+          currencyCode: 'USD',
+          itemCount: 2,
+          distinctItems: 1,
+          subtotal: 159.98,
+        },
+        persistence: 'memory',
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'A valid bearer token is required to access the cart.',
+    type: ApiErrorResponseDto,
+  })
   getCart(@Req() req: Request & { user: AuthenticatedUser }) {
     return this.cartService.getCartForUser(req.user);
   }
 
   @Post('items')
   @ApiOperation({ summary: 'Add an item to the authenticated user cart' })
-  @ApiCreatedResponse({ description: 'Adds an item and returns the cart snapshot.' })
+  @ApiCreatedResponse({
+    description: 'Adds an item and returns the cart snapshot.',
+  })
+  @ApiBadRequestResponse({
+    description: 'The cart item payload failed validation.',
+    type: ValidationErrorResponseDto,
+  })
+  @ApiNotFoundResponse({
+    description: 'The requested SKU was not found in the catalog.',
+    type: ApiErrorResponseDto,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'A valid bearer token is required to modify the cart.',
+    type: ApiErrorResponseDto,
+  })
   addItem(
     @Req() req: Request & { user: AuthenticatedUser },
     @Body() input: AddCartItemDto,

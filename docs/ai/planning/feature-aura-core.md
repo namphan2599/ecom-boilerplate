@@ -31,7 +31,7 @@ description: Break down work into actionable tasks and estimate timeline
 - [x] Task 2.7: Implement order history and admin order status management
 
 ### Phase 3: Integration & Polish
-- [ ] Task 3.1: Add OpenAPI docs, example requests, and error response schemas
+- [x] Task 3.1: Add OpenAPI docs, example requests, and error response schemas
 - [ ] Task 3.2: Add unit, integration, and e2e tests for critical commerce flows
 - [ ] Task 3.3: Add observability hooks, health checks, and deployment notes
 

@@ -32,8 +32,11 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Aura-Core API')
-    .setDescription('Production-ready modular monolith e-commerce boilerplate')
+    .setDescription(
+      'Production-ready modular monolith e-commerce boilerplate with documented public, admin, cart, checkout, and order-management APIs.',
+    )
     .setVersion('1.0.0')
+    .addServer('/api/v1', 'Versioned API base path')
     .addBearerAuth()
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
