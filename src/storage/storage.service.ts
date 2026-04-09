@@ -1,5 +1,7 @@
 import {
+  CreateBucketCommand,
   DeleteObjectCommand,
+  HeadBucketCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -19,6 +21,7 @@ export class StorageService {
     (process.env.S3_FORCE_PATH_STYLE ?? 'true').toLowerCase() !== 'false';
 
   private readonly fallbackObjects = new Map<string, Buffer>();
+  private readonly verifiedBuckets = new Set<string>();
   private readonly client?: S3Client;
 
   constructor() {
@@ -59,6 +62,8 @@ export class StorageService {
     }
 
     try {
+      await this.ensureBucketExists(input.bucket);
+
       await this.client.send(
         new PutObjectCommand({
           Bucket: input.bucket,
@@ -129,6 +134,51 @@ export class StorageService {
     }
 
     return `https://rustfs.local/${encodeURIComponent(bucket)}/${normalizedKey}`;
+  }
+
+  private async ensureBucketExists(bucket: string): Promise<void> {
+    if (!this.client || this.verifiedBuckets.has(bucket)) {
+      return;
+    }
+
+    try {
+      await this.client.send(
+        new HeadBucketCommand({
+          Bucket: bucket,
+        }),
+      );
+      this.verifiedBuckets.add(bucket);
+      return;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'unknown error';
+      this.logger.warn(
+        `Storage bucket \`${bucket}\` was not ready during head check. Attempting creation: ${message}`,
+      );
+    }
+
+    try {
+      await this.client.send(
+        new CreateBucketCommand({
+          Bucket: bucket,
+        }),
+      );
+      this.logger.log(`Created storage bucket \`${bucket}\` for local media uploads.`);
+      this.verifiedBuckets.add(bucket);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'unknown error';
+
+      if (/already exists|bucketalreadyownedbyyou|bucketalreadyexists/i.test(message)) {
+        this.verifiedBuckets.add(bucket);
+        return;
+      }
+
+      this.logger.error(
+        `Failed to create storage bucket \`${bucket}\`: ${message}`,
+      );
+      throw new ServiceUnavailableException(
+        'Product media storage is temporarily unavailable.',
+      );
+    }
   }
 
   private getFallbackMapKey(bucket: string, key: string): string {

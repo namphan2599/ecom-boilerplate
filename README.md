@@ -31,10 +31,32 @@
 $ pnpm install
 ```
 
+## Local Docker stack
+
+```bash
+# infrastructure only (PostgreSQL + Redis + RustFS)
+$ pnpm run db:up
+
+# full stack in Docker (API + PostgreSQL + Redis + RustFS)
+$ pnpm run docker:up
+
+# follow the API logs
+$ pnpm run docker:logs
+```
+
+Local endpoints:
+
+- API docs: `http://localhost:3000/api/docs`
+- Health: `http://localhost:3000/api/v1/health/ready`
+- PostgreSQL: `localhost:55432`
+- Redis: `localhost:56379`
+- RustFS API: `http://localhost:9100`
+- RustFS console: `http://localhost:9101`
+
 ## Seed demo data
 
 ```bash
-# start local services
+# start local infrastructure if you are running the API from the host
 $ pnpm run db:up
 
 # apply the current schema (or run your usual migrate flow)
@@ -43,6 +65,8 @@ $ pnpm exec prisma db push
 # seed canonical local/demo fixtures
 $ pnpm run seed
 ```
+
+> `pnpm run seed` now reads `.env` when present and falls back to `.env.example` for local defaults.
 
 Default demo credentials:
 

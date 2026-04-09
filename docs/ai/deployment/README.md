@@ -9,7 +9,7 @@ description: Define deployment process, infrastructure, and release procedures
 ## Infrastructure
 **Where will the application run?**
 
-- **Development:** local `docker compose` for PostgreSQL, Redis, and LocalStack with the NestJS API started via `pnpm start:dev`
+- **Development:** local `docker compose` for the NestJS API, PostgreSQL, Redis, and RustFS with health/docs endpoints exposed on the host
 - **Staging:** one containerized API instance plus managed PostgreSQL and Redis for release validation and webhook smoke tests
 - **Production:** at least two stateless API instances behind HTTPS load balancing, managed PostgreSQL, managed Redis, and object storage compatible with the configured S3 settings
 - **Environment separation:** isolated `.env` values, databases, Redis namespaces, Stripe secrets, and storage buckets per environment
@@ -39,7 +39,7 @@ description: Define deployment process, infrastructure, and release procedures
 - `NODE_ENV=development`
 - `LOG_LEVEL=debug`
 - `STRICT_HEALTH_CHECKS=false`
-- Local `DATABASE_URL` / `REDIS_URL` / LocalStack values from `.env.example`
+- Local `DATABASE_URL` / `REDIS_URL` / RustFS values from `.env.example`
 
 ### Staging
 - Production-like secrets and webhook configuration with non-production Stripe keys

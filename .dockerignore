@@ -1,0 +1,9 @@
+node_modules
+dist
+coverage
+.git
+.github
+.vscode
+.env
+pnpm-debug.log
+docs/ai
