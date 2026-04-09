@@ -17,20 +17,20 @@ description: Define testing approach, test cases, and quality assurance
 **What individual components need testing?**
 
 ### Storage service
-- [ ] Uploads an object to the configured bucket with the expected key and content type
-- [ ] Builds a stable public URL from config and bucket/key inputs
-- [ ] Deletes objects cleanly and treats repeated deletes safely when appropriate
+- [x] `src/storage/storage.service.spec.ts` covers fallback uploads/deletes and stable public URL building
+- [x] `src/storage/storage.service.spec.ts` covers RustFS/S3 bucket creation, bucket-cache reuse, path-style vs virtual-host URL generation, and upload/delete failure handling
+- [ ] Add a controller/integration-level repeated-delete scenario if idempotent delete semantics are tightened further
 
 ### Catalog media orchestration
-- [ ] Uploads a new hero image and persists `imageKey` + `imageUrl` on the product
-- [ ] Replaces an existing hero image and cleans up the previous object
-- [ ] Rolls back/cleans up the newly uploaded object if the DB update fails
-- [ ] Rejects unknown product ids with `404`
+- [x] `src/catalog/catalog.service.spec.ts` uploads a new hero image and persists `imageKey` + `imageUrl` in fallback mode
+- [x] `src/catalog/catalog.service.spec.ts` replaces an existing hero image and verifies cleanup of the previous object reference
+- [ ] Add a Prisma-backed rollback test that proves the newly uploaded object is cleaned up when the DB update fails
+- [x] `src/catalog/catalog.service.spec.ts` rejects unknown product ids with `404`
 
 ### Validation / controller behavior
-- [ ] Rejects unsupported MIME types (`gif`, `svg`, etc.)
-- [ ] Rejects payloads larger than **5 MB**
-- [ ] Rejects non-admin or unauthenticated requests
+- [ ] Add controller tests for unsupported MIME types (`gif`, `svg`, etc.)
+- [ ] Add controller tests for payloads larger than **5 MB**
+- [ ] Add auth/controller tests for non-admin or unauthenticated requests
 
 ## Integration Tests
 **How do we test component interactions?**
@@ -62,9 +62,21 @@ description: Define testing approach, test cases, and quality assurance
 - Run `pnpm build` to verify the feature compiles cleanly
 - Run `pnpm test -- --runInBand` for unit/integration coverage
 - Run `pnpm test:e2e` for API workflow verification
+- Use focused coverage checks while iterating on media behavior:
+  - `pnpm exec jest src/storage/storage.service.spec.ts --coverage --runInBand --coverageReporters=text --collectCoverageFrom=storage/storage.service.ts`
+  - `pnpm exec jest src/catalog/catalog.service.spec.ts --coverage --runInBand --coverageReporters=text --collectCoverageFrom=catalog/catalog.service.ts`
 - Track any uncovered edge cases in PR notes before merging
 
-> No new execution evidence is recorded yet for this feature; the commands above are the required verification gates once implementation lands.
+### Latest execution evidence (2026-04-09)
+- `pnpm exec jest src/storage/storage.service.spec.ts --runInBand` ✅ (`10/10` tests)
+- `pnpm exec jest src/catalog/catalog.service.spec.ts --runInBand` ✅ (`4/4` tests)
+- `pnpm test -- --runInBand` ✅ (`8/8` suites, `32/32` tests)
+- Focused coverage result for `src/storage/storage.service.ts` ✅
+  - Statements: `100%`
+  - Functions: `100%`
+  - Lines: `100%`
+  - Branches: `88.57%` (remaining branches are mostly defensive `unknown error` paths)
+- Focused coverage result for `src/catalog/catalog.service.ts` is still partial (`40.25%` lines) because the file includes many non-media catalog branches outside this storage-focused test slice
 
 ## Manual Testing
 **What requires human validation?**
@@ -87,3 +99,4 @@ description: Define testing approach, test cases, and quality assurance
 - Tag bugs under **`catalog`**, **`storage`**, or **`media-storage`**
 - Treat unauthorized upload, broken public URLs, and orphaned object leaks as **high priority**
 - Re-run the media upload regression suite whenever storage config or catalog DTOs change
+- Deferred follow-up tests should concentrate on controller validation, auth guards, and the Prisma-backed rollback path
