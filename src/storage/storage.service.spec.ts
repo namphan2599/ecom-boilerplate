@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from '@jest/globals';
-import { StorageService } from './rustfs-storage.service';
+import { StorageService } from './storage.service';
 
 describe('RustfsStorageService', () => {
   const originalEnv = {

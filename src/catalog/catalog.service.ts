@@ -2,7 +2,8 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { Prisma, ProductStatus } from '@prisma/client';
 import { randomUUID } from 'node:crypto';
 import { PrismaService } from '../prisma/prisma.service';
-import { StorageService } from '../storage/rustfs-storage.service';
+import { getSeedProducts } from '../seeding/fixtures/catalog.fixtures';
+import { StorageService } from '../storage/storage.service';
 import { CreateProductDto, ProductVariantDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 
@@ -79,37 +80,39 @@ export class CatalogService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
   ) {
-    const seeded = this.createFallbackProduct({
-      name: 'Aura Signature Hoodie',
-      slug: 'aura-signature-hoodie',
-      description: 'Heavyweight everyday hoodie with multi-currency pricing.',
-      status: ProductStatus.ACTIVE,
-      isFeatured: true,
-      category: {
-        name: 'Apparel',
-        slug: 'apparel',
-      },
-      tags: [
-        { name: 'Featured', slug: 'featured' },
-        { name: 'Outerwear', slug: 'outerwear' },
-      ],
-      variants: [
-        {
-          sku: 'HOODIE-BLK-M',
-          title: 'Black / Medium',
-          attributes: { color: 'black', size: 'M' },
-          prices: [
-            { currencyCode: 'USD', amount: 79.99, compareAtAmount: 89.99 },
-            { currencyCode: 'EUR', amount: 74.99 },
-          ],
-          inventoryOnHand: 24,
-          inventoryReserved: 0,
-          isActive: true,
+    for (const fixture of getSeedProducts('demo')) {
+      const seeded = this.createFallbackProduct({
+        name: fixture.name,
+        slug: fixture.slug,
+        description: fixture.description,
+        status: fixture.status,
+        imageUrl: fixture.imageUrl ?? undefined,
+        isFeatured: fixture.isFeatured ?? false,
+        category: {
+          name: fixture.category.name,
+          slug: fixture.category.slug,
         },
-      ],
-    });
+        tags: fixture.tags.map((tag) => ({
+          name: tag.name,
+          slug: tag.slug,
+        })),
+        variants: fixture.variants.map((variant) => ({
+          sku: variant.sku,
+          title: variant.title,
+          attributes: variant.attributes,
+          prices: variant.prices.map((price) => ({
+            currencyCode: price.currencyCode,
+            amount: price.amount,
+            compareAtAmount: price.compareAtAmount ?? undefined,
+          })),
+          inventoryOnHand: variant.inventoryOnHand,
+          inventoryReserved: variant.inventoryReserved ?? 0,
+          isActive: variant.isActive ?? true,
+        })),
+      });
 
-    this.fallbackProducts.set(seeded.id, seeded);
+      this.fallbackProducts.set(seeded.id, seeded);
+    }
   }
 
   async listProducts(): Promise<{ items: CatalogProductView[]; total: number }> {

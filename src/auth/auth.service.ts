@@ -1,6 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { compare } from 'bcryptjs';
+import { PrismaService } from '../prisma/prisma.service';
 import { AppRole } from '../common/auth/role.enum';
+import { SEED_LOCAL_USERS } from '../seeding/fixtures/users.fixtures';
 
 export interface AuthenticatedUser {
   userId: string;
@@ -19,27 +22,41 @@ export interface AuthTokenResponse {
 
 @Injectable()
 export class AuthService {
-  private readonly fallbackUsers = [
-    {
-      id: 'admin-local',
-      email: 'admin@aura.local',
-      password: 'Admin123!',
-      role: AppRole.ADMIN,
-      displayName: 'Aura Admin',
-    },
-    {
-      id: 'customer-local',
-      email: 'customer@aura.local',
-      password: 'Customer123!',
-      role: AppRole.CUSTOMER,
-      displayName: 'Aura Customer',
-    },
-  ] as const;
+  private readonly fallbackUsers = SEED_LOCAL_USERS;
 
-  constructor(private readonly jwtService: JwtService) {}
+  constructor(
+    private readonly jwtService: JwtService,
+    private readonly prisma: PrismaService,
+  ) {}
 
-  validateLocalUser(email: string, password: string): AuthenticatedUser {
+  async validateLocalUser(
+    email: string,
+    password: string,
+  ): Promise<AuthenticatedUser> {
     const normalizedEmail = email.trim().toLowerCase();
+
+    if (this.prisma.isReady()) {
+      const user = await this.prisma.user.findUnique({
+        where: { email: normalizedEmail },
+      });
+
+      if (user?.passwordHash && user.isActive) {
+        const isPasswordValid = await compare(password, user.passwordHash);
+
+        if (isPasswordValid) {
+          return {
+            userId: user.id,
+            email: user.email,
+            role: user.role as AppRole,
+            displayName:
+              [user.firstName, user.lastName].filter(Boolean).join(' ') ||
+              user.email,
+            provider: 'local',
+          };
+        }
+      }
+    }
+
     const user = this.fallbackUsers.find(
       (candidate) =>
         candidate.email.toLowerCase() === normalizedEmail &&

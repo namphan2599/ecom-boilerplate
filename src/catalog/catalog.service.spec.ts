@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 import { ProductStatus } from '@prisma/client';
 import { beforeEach, describe, expect, it } from '@jest/globals';
 import { PrismaService } from '../prisma/prisma.service';
-import { StorageService } from '../storage/rustfs-storage.service';
+import { StorageService } from '../storage/storage.service';
 import { CatalogService } from './catalog.service';
 
 describe('CatalogService media storage', () => {

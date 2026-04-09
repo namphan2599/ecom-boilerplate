@@ -31,6 +31,31 @@
 $ pnpm install
 ```
 
+## Seed demo data
+
+```bash
+# start local services
+$ pnpm run db:up
+
+# apply the current schema (or run your usual migrate flow)
+$ pnpm exec prisma db push
+
+# seed canonical local/demo fixtures
+$ pnpm run seed
+```
+
+Default demo credentials:
+
+- `admin@aura.local` / `Admin123!`
+- `customer@aura.local` / `Customer123!`
+
+Optional profiles:
+
+```bash
+$ pnpm run seed -- --profile=minimal
+$ pnpm exec prisma db seed -- --profile=demo
+```
+
 ## Compile and run the project
 
 ```bash
