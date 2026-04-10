@@ -1,72 +1,111 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Aura Monorepo
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Aura is an e-commerce workspace managed with **`pnpm` workspaces** and **Turborepo**.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Workspace layout
 
-## Description
+```text
+apps/
+  backend/      # NestJS API + Prisma + tests
+  storefront/   # Next.js shopper UI
+packages/
+  eslint-config/
+  typescript-config/
+```
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+> `apps/admin` is intentionally reserved for a future admin site and is not part of the current implementation scope.
 
-## Project setup
+## Getting started
 
 ```bash
-$ pnpm install
+pnpm install
+```
+
+### Repo-wide commands
+
+```bash
+# run backend + storefront together
+pnpm dev
+
+# verify the full workspace
+pnpm build
+pnpm lint
+pnpm test
+pnpm typecheck
+```
+
+### App-specific commands
+
+```bash
+# backend
+pnpm start:dev
+pnpm backend:test
+pnpm backend:test:e2e
+
+# storefront
+pnpm storefront:dev
+pnpm storefront:lint
+pnpm storefront:test
+pnpm storefront:build
 ```
 
 ## Local Docker stack
 
 ```bash
 # infrastructure only (PostgreSQL + Redis + RustFS)
-$ pnpm run db:up
+pnpm db:up
 
 # full stack in Docker (API + PostgreSQL + Redis + RustFS)
-$ pnpm run docker:up
+pnpm docker:up
 
-# follow the API logs
-$ pnpm run docker:logs
+# follow API logs
+pnpm docker:logs
 ```
 
 Local endpoints:
 
 - API docs: `http://localhost:3000/api/docs`
 - Health: `http://localhost:3000/api/v1/health/ready`
+- Storefront: `http://localhost:3001`
 - PostgreSQL: `localhost:55432`
 - Redis: `localhost:56379`
 - RustFS API: `http://localhost:9100`
 - RustFS console: `http://localhost:9101`
 
+## Backend (`apps/backend`)
+
+The Aura API remains the source of truth for auth, catalog, cart, checkout, orders, and media storage.
+
+```bash
+# host-based backend dev
+pnpm start:dev
+
+# production-style build
+pnpm backend:build
+```
+
+## Storefront (`apps/storefront`)
+
+The shopper-facing Next.js storefront continues to consume Aura at `/api/v1`.
+
+```bash
+AURA_API_BASE_URL=http://localhost:3000/api/v1
+NEXT_PUBLIC_STOREFRONT_URL=http://localhost:3001
+```
+
 ## Seed demo data
 
 ```bash
-# start local infrastructure if you are running the API from the host
-$ pnpm run db:up
+# start local infrastructure if running the API on the host
+pnpm db:up
 
-# apply the current schema (or run your usual migrate flow)
-$ pnpm exec prisma db push
+# apply the schema (or use your normal migration flow)
+pnpm prisma:generate
+pnpm --dir apps/backend exec prisma db push
 
 # seed canonical local/demo fixtures
-$ pnpm run seed
+pnpm seed
 ```
-
-> `pnpm run seed` now reads `.env` when present and falls back to `.env.example` for local defaults.
 
 Default demo credentials:
 
@@ -76,72 +115,7 @@ Default demo credentials:
 Optional profiles:
 
 ```bash
-$ pnpm run seed -- --profile=minimal
-$ pnpm exec prisma db seed -- --profile=demo
+pnpm seed -- --profile=minimal
+pnpm --dir apps/backend exec prisma db seed -- --profile=demo
 ```
 
-## Compile and run the project
-
-```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
-```
-
-## Run tests
-
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
-
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
-
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
