@@ -1,6 +1,7 @@
 {
   "version": "0.21.1",
   "environments": [
+    "antigravity",
     "github"
   ],
   "phases": [
@@ -13,5 +14,6 @@
     "monitoring"
   ],
   "createdAt": "2026-04-08T03:12:21.640Z",
-  "updatedAt": "2026-04-08T03:12:21.702Z"
+  "updatedAt": "2026-04-14T07:30:45.640Z",
+  "skills": []
 }
