@@ -32,15 +32,21 @@ export default function ProductsPage() {
       cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
     },
     {
-      accessorKey:'categoryId'
-    },
-    {
       accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
         <Badge variant={row.getValue("isPublished") ? "default" : "secondary"}>
           {row.getValue("isPublished") ? "Published" : "Draft"}
         </Badge>
+      ),
+    },
+    {
+      accessorKey: "description",
+      header: "Description",
+      cell: ({ row }) => (
+        <div className="text-sm text-muted-foreground">
+          {row.getValue("description") || "No description"}
+        </div>
       ),
     },
     //display variants product

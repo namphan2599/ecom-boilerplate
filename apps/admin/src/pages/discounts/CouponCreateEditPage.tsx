@@ -21,10 +21,10 @@ import { Separator } from "@/components/ui/separator"
 const couponSchema = z.object({
   code: z.string().min(3, "Code must be at least 3 characters"),
   type: z.enum(["PERCENTAGE", "FIXED"]),
-  amount: z.number().min(0, "Amount must be positive"),
+  value: z.number().min(0, "Amount must be positive"),
   usageLimit: z.number().optional().nullable(),
   isActive: z.boolean(),
-  expiresAt: z.string().optional().nullable(),
+  expiresAt: z.iso.date().optional().nullable(),
 })
 
 type CouponFormValues = z.infer<typeof couponSchema>
@@ -44,25 +44,25 @@ export default function CouponCreateEditPage() {
   const form = useForm<CouponFormValues>({
     resolver: zodResolver(couponSchema),
     defaultValues: initialData || {
-      code: "",
-      type: "PERCENTAGE" as const,
-      amount: 0,
+      code: '',
+      type: 'PERCENTAGE' as const,
+      value: 0,
       usageLimit: null,
       isActive: true,
       expiresAt: null,
     },
-  })
+  });
 
   // Update form defaults when data is loaded
   if (initialData && !form.getValues("code")) {
     form.reset({
       code: initialData.code,
       type: initialData.type,
-      amount: initialData.amount,
+      value: initialData.value,
       usageLimit: initialData.usageLimit,
       isActive: initialData.isActive,
       expiresAt: initialData.expiresAt,
-    })
+    });
   }
 
   const mutation = useMutation({
@@ -92,16 +92,21 @@ export default function CouponCreateEditPage() {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-3xl font-bold tracking-tight">
-              {isEdit ? "Edit Coupon" : "Create Coupon"}
+              {isEdit ? 'Edit Coupon' : 'Create Coupon'}
             </h2>
             <p className="text-sm text-muted-foreground">
-              {isEdit ? "Update promotional code details." : "Add a new discount code for your customers."}
+              {isEdit
+                ? 'Update promotional code details.'
+                : 'Add a new discount code for your customers.'}
             </p>
           </div>
         </div>
         <Separator />
-        
-        <form onSubmit={form.handleSubmit(onFormSubmit)} className="space-y-8 w-full">
+
+        <form
+          onSubmit={form.handleSubmit(onFormSubmit)}
+          className="space-y-8 w-full"
+        >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <Card>
               <CardHeader>
@@ -113,36 +118,40 @@ export default function CouponCreateEditPage() {
                   <Input
                     id="code"
                     placeholder="WINTER20"
-                    {...form.register("code")}
+                    {...form.register('code')}
                     disabled={mutation.isPending}
                   />
                   {form.formState.errors.code && (
-                    <p className="text-xs text-red-500">{form.formState.errors.code.message}</p>
+                    <p className="text-xs text-red-500">
+                      {form.formState.errors.code.message}
+                    </p>
                   )}
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="type">Type</Label>
                     <Select
-                      onValueChange={(val: any) => form.setValue("type", val)}
-                      value={form.watch("type")}
+                      onValueChange={(val: any) => form.setValue('type', val)}
+                      value={form.watch('type')}
                     >
                       <SelectTrigger id="type">
                         <SelectValue placeholder="Select type" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="PERCENTAGE">Percentage (%)</SelectItem>
+                        <SelectItem value="PERCENTAGE">
+                          Percentage (%)
+                        </SelectItem>
                         <SelectItem value="FIXED">Fixed Amount</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="amount">Value</Label>
+                    <Label htmlFor="value">Value</Label>
                     <Input
-                      id="amount"
+                      id="value"
                       type="number"
-                      {...form.register("amount", { valueAsNumber: true })}
+                      {...form.register('value', { valueAsNumber: true })}
                       disabled={mutation.isPending}
                     />
                   </div>
@@ -156,22 +165,24 @@ export default function CouponCreateEditPage() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="usageLimit">Usage Limit (Leave empty for unlimited)</Label>
+                  <Label htmlFor="usageLimit">
+                    Usage Limit (Leave empty for unlimited)
+                  </Label>
                   <Input
                     id="usageLimit"
                     type="number"
                     placeholder="∞"
-                    {...form.register("usageLimit", { valueAsNumber: true })}
+                    {...form.register('usageLimit', { valueAsNumber: true })}
                     disabled={mutation.isPending}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="expiresAt">Expiration Date (Optional)</Label>
                   <Input
                     id="expiresAt"
                     type="date"
-                    {...form.register("expiresAt")}
+                    {...form.register('expiresAt')}
                     disabled={mutation.isPending}
                   />
                 </div>
@@ -184,8 +195,10 @@ export default function CouponCreateEditPage() {
                     </p>
                   </div>
                   <Switch
-                    checked={form.watch("isActive")}
-                    onCheckedChange={(checked) => form.setValue("isActive", checked)}
+                    checked={form.watch('isActive')}
+                    onCheckedChange={(checked) =>
+                      form.setValue('isActive', checked)
+                    }
                     disabled={mutation.isPending}
                   />
                 </div>
@@ -195,12 +208,12 @@ export default function CouponCreateEditPage() {
 
           <div className="flex items-center gap-4">
             <Button disabled={mutation.isPending} type="submit">
-              {isEdit ? "Save Changes" : "Create Coupon"}
+              {isEdit ? 'Save Changes' : 'Create Coupon'}
             </Button>
             <Button
               variant="outline"
               type="button"
-              onClick={() => navigate("/discounts")}
+              onClick={() => navigate('/discounts')}
               disabled={mutation.isPending}
             >
               Cancel
@@ -209,5 +222,5 @@ export default function CouponCreateEditPage() {
         </form>
       </div>
     </div>
-  )
+  );
 }

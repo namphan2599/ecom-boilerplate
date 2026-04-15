@@ -67,7 +67,7 @@ export interface Coupon {
   id: string;
   code: string;
   type: 'PERCENTAGE' | 'FIXED';
-  amount: number;
+  value: number;
   currency?: string;
   expiresAt: string | null;
   usageLimit: number | null;

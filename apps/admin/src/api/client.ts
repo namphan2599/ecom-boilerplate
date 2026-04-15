@@ -45,7 +45,9 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     return {} as T;
   }
 
-  return response.json();
+  const text = await response.text();
+  if (!text) return {} as T;
+  return JSON.parse(text);
 }
 
 export const client = {

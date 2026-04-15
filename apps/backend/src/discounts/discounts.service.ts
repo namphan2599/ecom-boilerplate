@@ -6,6 +6,8 @@ import {
 import { CouponType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { buildSeedCouponFixtures } from '../seeding/fixtures/coupons.fixtures';
+import { UpdateDiscountDto } from './dto/update-discount.dto';
+import { CreateDiscountDto } from './dto/create-discount.dto';
 
 export interface ApplyCouponInput {
   code: string;
@@ -44,8 +46,85 @@ export interface CouponApplicationResult {
 export class DiscountsService {
   private readonly fallbackCoupons = new Map<string, CouponView>();
 
-  constructor(private readonly prisma?: PrismaService) {
+  constructor(private readonly prisma: PrismaService) {
     this.seedFallbackCoupons();
+  }
+
+  async getDiscounts(): Promise<CouponView[]> {
+    const coupons = await this.prisma.coupon.findMany();
+    return coupons.map((coupon) => this.toCouponView(coupon));
+  }
+
+  async getDiscountById(id: string): Promise<CouponView> {
+    const coupon = await this.prisma.coupon.findUnique({ where: { id } });
+    if (!coupon) {
+      throw new BadRequestException(`No discount found with id \`${id}\`.`);
+    }
+    return this.toCouponView(coupon);
+  }
+
+  async createDiscount(input: CreateDiscountDto): Promise<CouponView> {
+    const normalizedCode = this.normalizeCode(input.code);
+    const existing = await this.prisma.coupon.findUnique({
+      where: { code: normalizedCode },
+    });
+    if (existing) {
+      throw new ConflictException(
+        `A discount with code \`${normalizedCode}\` already exists.`,
+      );
+    }
+    const created = await this.prisma.coupon.create({
+      data: {
+        code: normalizedCode,
+        description: input.description,
+        type: input.type,
+        value: input.value,
+        currencyCode: input.currencyCode,
+        minOrderAmount: input.minOrderAmount,
+        maxDiscountAmount: input.maxDiscountAmount,
+        startsAt: input.startsAt,
+        expiresAt: input.expiresAt,
+        usageLimit: input.usageLimit,
+        isActive: input.isActive,
+      },
+    });
+    return this.toCouponView(created);
+  }
+
+  async updateDiscountById(
+    id: string,
+    input: UpdateDiscountDto,
+  ): Promise<CouponView> {
+    const coupon = await this.prisma.coupon.findUnique({ where: { id } });
+    if (!coupon) {
+      throw new BadRequestException(`No discount found with id \`${id}\`.`);
+    }
+    const updated = await this.prisma.coupon.update({
+      where: { id },
+      data: {
+        id: coupon.id, // ID should not change
+        code: coupon.code, // Code should not change
+        description: input.description ?? coupon.description,
+        type: input.type ?? coupon.type,
+        value: input.value ?? coupon.value,
+        currencyCode: input.currencyCode ?? coupon.currencyCode,
+        minOrderAmount: input.minOrderAmount ?? coupon.minOrderAmount,
+        maxDiscountAmount: input.maxDiscountAmount ?? coupon.maxDiscountAmount,
+        startsAt: input.startsAt ?? coupon.startsAt,
+        expiresAt: input.expiresAt ?? coupon.expiresAt,
+        usageLimit: input.usageLimit ?? coupon.usageLimit,
+        isActive: input.isActive ?? coupon.isActive,
+      },
+    });
+    return this.toCouponView(updated);
+  }
+
+  async deleteDiscountById(id: string): Promise<void> {
+    const coupon = await this.prisma.coupon.findUnique({ where: { id } });
+    if (!coupon) {
+      throw new BadRequestException(`No discount found with id \`${id}\`.`);
+    }
+    await this.prisma.coupon.delete({ where: { id } });
   }
 
   async validateAndApplyCoupon(

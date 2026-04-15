@@ -9,6 +9,7 @@ import { MoreHorizontal, Plus, Pencil, Trash } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -28,7 +29,12 @@ export default function DiscountsPage() {
   const deleteMutation = useMutation({
     mutationFn: (id: string) => discountsApi.deleteCoupon(id),
     onSuccess: () => {
+      console.log("Coupon deleted successfully")  
       queryClient.invalidateQueries({ queryKey: ["coupons"] })
+    },
+    onError: (error) => {
+      console.error("Failed to delete coupon:", error)
+      alert("Failed to delete coupon. Please try again.")
     },
   })
 
@@ -48,11 +54,11 @@ export default function DiscountsPage() {
       ),
     },
     {
-      accessorKey: "amount",
+      accessorKey: "value",
       header: "Value",
       cell: ({ row }) => {
         const type = row.original.type
-        const amount = row.original.amount
+        const amount = row.original.value
         return (
           <div>
             {type === "PERCENTAGE" ? `${amount}%` : `$${amount}`}
@@ -100,30 +106,35 @@ export default function DiscountsPage() {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger
-              className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+              className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
             >
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem>
-                <Link to={`/discounts/${coupon.id}`} className="flex w-full items-center">
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="text-red-600"
-                onClick={() => deleteMutation.mutate(coupon.id)}
-              >
-                <Trash className="mr-2 h-4 w-4" />
-                Delete
-              </DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem>
+                  <Link
+                    to={`/discounts/${coupon.id}`}
+                    className="flex w-full items-center"
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-600"
+                  onClick={() => deleteMutation.mutate(coupon.id)}
+                >
+                  <Trash className="mr-2 h-4 w-4" />
+                  Delete
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-        )
+        );
       },
     },
   ]
@@ -149,7 +160,7 @@ export default function DiscountsPage() {
         <div className="mt-4">
           <DataTable 
             columns={columns} 
-            data={data?.data || []} 
+            data={data || []} 
             searchKey="code" 
           />
           {isLoading && (

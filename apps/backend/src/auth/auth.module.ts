@@ -16,7 +16,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
     JwtModule.register({
       secret: process.env.JWT_SECRET ?? 'change-me-in-production',
       signOptions: {
-        expiresIn: '15m',
+        expiresIn: '30d',
       },
     }),
   ],
