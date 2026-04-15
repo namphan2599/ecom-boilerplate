@@ -26,7 +26,7 @@ export interface Product {
   name: string;
   slug: string;
   description: string;
-  isPublished: boolean;
+  isFeatured: boolean;
   categoryId: string | null;
   tags: Tag[];
   variants: ProductVariant[];
@@ -109,7 +109,7 @@ export interface OrderItem {
 
 // Paginated response wrapper
 export interface PaginatedResponse<T> {
-  data: T[];
+  items: T[];
   total: number;
   page: number;
   limit: number;

@@ -9,6 +9,7 @@ import { MoreHorizontal, Plus, Pencil, Trash } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
@@ -23,6 +24,7 @@ export default function ProductsPage() {
     queryFn: () => productsApi.getProducts({ limit: 100 }),
   })
 
+
   const columns: ColumnDef<Product>[] = [
     {
       accessorKey: "name",
@@ -30,13 +32,33 @@ export default function ProductsPage() {
       cell: ({ row }) => <div className="font-medium">{row.getValue("name")}</div>,
     },
     {
-      accessorKey: "isPublished",
+      accessorKey:'categoryId'
+    },
+    {
+      accessorKey: "status",
       header: "Status",
       cell: ({ row }) => (
         <Badge variant={row.getValue("isPublished") ? "default" : "secondary"}>
           {row.getValue("isPublished") ? "Published" : "Draft"}
         </Badge>
       ),
+    },
+    //display variants product
+    {
+      accessorKey: "variants",
+      header: "Variants",
+      cell: ({ row }) => {
+        const variants = row.getValue("variants") as any[]
+        return (
+          <div className="flex flex-col space-y-1">
+            {variants.map((variant) => (
+              <div key={variant.sku} className="text-sm text-muted-foreground">
+                {variant.sku} - ${variant.prices[0]?.amount || "N/A"}
+              </div>
+            ))}
+          </div>
+        )
+      }
     },
     {
       accessorKey: "createdAt",
@@ -55,32 +77,37 @@ export default function ProductsPage() {
         return (
           <DropdownMenu>
             <DropdownMenuTrigger
-              className={cn(buttonVariants({ variant: "ghost", size: "icon" }))}
+              className={cn(buttonVariants({ variant: 'ghost', size: 'icon' }))}
             >
               <span className="sr-only">Open menu</span>
               <MoreHorizontal className="h-4 w-4" />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => navigator.clipboard.writeText(product.id)}
-              >
-                Copy ID
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem>
-                <Link to={`/products/${product.id}`} className="flex w-full items-center">
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Edit Product
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">
-                <Trash className="mr-2 h-4 w-4" />
-                Delete Product
-              </DropdownMenuItem>
+              <DropdownMenuGroup>
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem
+                  onClick={() => navigator.clipboard.writeText(product.id)}
+                >
+                  Copy ID
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Link
+                    to={`/products/${product.slug}`}
+                    className="flex w-full items-center"
+                  >
+                    <Pencil className="mr-2 h-4 w-4" />
+                    Edit Product
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem className="text-red-600">
+                  <Trash className="mr-2 h-4 w-4" />
+                  Delete Product
+                </DropdownMenuItem>
+              </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
-        )
+        );
       },
     },
   ]
@@ -106,7 +133,7 @@ export default function ProductsPage() {
         <div className="mt-4">
           <DataTable 
             columns={columns} 
-            data={data?.data || []} 
+            data={data?.items || []} 
             searchKey="name" 
           />
           {isLoading && (

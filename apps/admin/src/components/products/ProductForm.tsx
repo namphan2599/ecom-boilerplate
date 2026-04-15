@@ -249,7 +249,7 @@ export function ProductForm({ initialData, onSubmit }: ProductFormProps) {
             >
               {initialData ? "Save changes" : "Create product"}
             </Button>
-            <Button
+            {/* <Button
               disabled={isLoading}
               variant="outline"
               className="w-full"
@@ -257,7 +257,7 @@ export function ProductForm({ initialData, onSubmit }: ProductFormProps) {
               onClick={() => navigate("/products")}
             >
               Cancel
-            </Button>
+            </Button> */}
           </div>
         </div>
       </div>

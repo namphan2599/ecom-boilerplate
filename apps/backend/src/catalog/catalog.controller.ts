@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Query,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -112,7 +113,7 @@ export class CatalogController {
     return this.catalogService.listTags();
   }
 
-  @Post('admin/products')
+  @Post('products')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(AppRole.ADMIN)
   @ApiBearerAuth()

@@ -12,6 +12,8 @@ async function bootstrap() {
     rawBody: true,
   });
 
+  app.enableCors();
+
   app.enableShutdownHooks();
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(
@@ -29,7 +31,7 @@ async function bootstrap() {
   const prismaService = app.get(PrismaService);
   prismaService.enableShutdownHooks(app);
 
-  const apiPrefix = process.env.API_PREFIX ?? 'api/v1';
+  const apiPrefix = 'api/v1';
   app.setGlobalPrefix(apiPrefix);
 
   const swaggerConfig = new DocumentBuilder()
@@ -38,7 +40,6 @@ async function bootstrap() {
       'Production-ready modular monolith e-commerce boilerplate with documented public, admin, cart, checkout, and order-management APIs.',
     )
     .setVersion('1.0.0')
-    .addServer('/api/v1', 'Versioned API base path')
     .addBearerAuth()
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);

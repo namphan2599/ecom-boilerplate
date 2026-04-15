@@ -65,7 +65,7 @@ export function DataTable<TData, TValue>({
       rowSelection,
     },
   })
-
+  
   return (
     <div className="space-y-4">
       {searchKey && (
