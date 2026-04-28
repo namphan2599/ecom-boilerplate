@@ -5,20 +5,20 @@ import { PriceBadge } from './price-badge';
 
 export function ProductCard({ product }: { product: ProductCardModel }) {
   return (
-    <article className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+    <article className="overflow-hidden rounded-[18px] border border-[#e0e0e0] bg-white transition hover:shadow-lg">
       <Link href={`/products/${product.slug}`} className="block">
         {product.imageUrl ? (
-          <div className="relative h-52 w-full bg-slate-100">
+          <div className="relative h-52 w-full bg-[#f5f5f7]">
             <Image
               src={product.imageUrl}
               alt={product.name}
               fill
               unoptimized
-              className="object-cover"
+              className="object-cover transition-transform duration-300 hover:scale-105"
             />
           </div>
         ) : (
-          <div className="flex h-52 items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-cyan-700 text-lg font-semibold text-white">
+          <div className="flex h-52 items-center justify-center bg-linear-to-br from-[#1d1d1f] via-[#434344] to-[#0066cc] text-lg font-semibold text-white">
             Aura
           </div>
         )}
@@ -27,21 +27,21 @@ export function ProductCard({ product }: { product: ProductCardModel }) {
       <div className="space-y-4 p-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700">
+            <span className="rounded-full bg-[#f5f5f7] px-2.5 py-1 text-xs font-medium text-[#1d1d1f]">
               {product.categoryLabel}
             </span>
             {product.featured ? (
-              <span className="rounded-full bg-cyan-50 px-2.5 py-1 text-xs font-semibold text-cyan-700">
+              <span className="rounded-full bg-[#0066cc]/10 px-2.5 py-1 text-xs font-semibold text-[#0066cc]">
                 Featured
               </span>
             ) : null}
           </div>
 
-          <Link href={`/products/${product.slug}`} className="block text-lg font-semibold text-slate-950 hover:text-cyan-700">
+          <Link href={`/products/${product.slug}`} className="block text-lg font-semibold text-[#1d1d1f] hover:text-[#0066cc]">
             {product.name}
           </Link>
 
-          <p className="line-clamp-2 text-sm text-slate-600">{product.description}</p>
+          <p className="line-clamp-2 text-sm text-[#86868b]">{product.description}</p>
         </div>
 
         <div className="flex items-center justify-between gap-3">
@@ -50,7 +50,7 @@ export function ProductCard({ product }: { product: ProductCardModel }) {
             currencyCode={product.priceCurrencyCode}
             compareAtAmount={product.compareAtAmount}
           />
-          <span className="text-xs text-slate-500">{product.variantCount} variant(s)</span>
+          <span className="text-xs text-[#86868b]">{product.variantCount} variant(s)</span>
         </div>
       </div>
     </article>
