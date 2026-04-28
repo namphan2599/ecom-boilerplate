@@ -20,44 +20,46 @@ export default async function CartPage({
   const cart = await getCart(session.token, session.user.userId);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">Your cart</p>
-        <h1 className="mt-2 text-3xl font-semibold text-slate-950">Review Aura cart items</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Signed in as <span className="font-medium text-slate-900">{session.user.email}</span>
+    <main className="mx-auto max-w-[980px] px-4 py-12">
+      <section className="pb-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-primary)]">Your cart</p>
+        <h1 className="mt-2 text-[34px] font-semibold tracking-[-0.374px] leading-[1.47] text-[var(--color-ink)]">
+          Review Aura cart items
+        </h1>
+        <p className="mt-2 text-sm text-[var(--color-ink-muted-48)]">
+          Signed in as <span className="font-medium text-[var(--color-ink)]">{session.user.email}</span>
         </p>
       </section>
 
       {added ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+        <div className="mb-6 rounded-[var(--rounded-md)] border border-[var(--color-hairline)] bg-[var(--color-canvas-parchment)] px-4 py-3 text-sm text-[var(--color-ink-muted-80)]">
           The product was added to your cart.
         </div>
       ) : null}
 
       {error ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+        <div className="mb-6 rounded-[var(--rounded-md)] border border-[var(--color-hairline)] bg-[var(--color-surface-pearl)] px-4 py-3 text-sm text-[var(--color-ink-muted-80)]">
           {error}
         </div>
       ) : null}
 
       {cart.items.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-600">
+        <div className="rounded-[var(--rounded-lg)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] p-10 text-center text-[var(--color-ink-muted-80)]">
           <p>Your cart is empty.</p>
-          <Link href="/products" className="mt-4 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white">
+          <Link href="/products" className="mt-4 inline-block rounded-[var(--rounded-pill)] bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-focus)]">
             Browse products
           </Link>
         </div>
       ) : (
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <section className="space-y-4">
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          <section className="space-y-0">
             {cart.items.map((item) => (
-              <article key={`${item.sku}-${item.currencyCode}`} className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <article key={`${item.sku}-${item.currencyCode}`} className="border-b border-[var(--color-hairline)] py-6 last:border-0">
                 <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="space-y-1">
-                    <h2 className="text-lg font-semibold text-slate-950">{item.productName}</h2>
-                    <p className="text-sm text-slate-600">{item.variantName} · {item.sku}</p>
-                    <p className="text-sm text-slate-600">
+                    <h2 className="text-lg font-semibold text-[var(--color-ink)]">{item.productName}</h2>
+                    <p className="text-sm text-[var(--color-ink-muted-48)]">{item.variantName} · {item.sku}</p>
+                    <p className="text-sm text-[var(--color-ink-muted-80)]">
                       {formatCurrency(item.unitPrice, item.currencyCode)} each
                     </p>
                   </div>
@@ -70,11 +72,11 @@ export default async function CartPage({
                         name="quantity"
                         min={0}
                         defaultValue={item.quantity}
-                        className="w-20 rounded-xl border border-slate-300 px-3 py-2 text-sm text-slate-900"
+                        className="w-20 rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-3 py-2 text-sm text-[var(--color-ink)]"
                       />
                       <button
                         type="submit"
-                        className="rounded-full border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-700"
+                        className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-surface-pearl)] px-3 py-2 text-xs font-semibold text-[var(--color-ink-muted-80)]"
                       >
                         Update
                       </button>
@@ -82,7 +84,7 @@ export default async function CartPage({
 
                     <form action={removeCartItemAction}>
                       <input type="hidden" name="sku" value={item.sku} />
-                      <button type="submit" className="text-sm font-medium text-rose-700 hover:text-rose-800">
+                      <button type="submit" className="text-sm font-medium text-[var(--color-primary)] hover:underline">
                         Remove item
                       </button>
                     </form>
@@ -92,9 +94,9 @@ export default async function CartPage({
             ))}
           </section>
 
-          <aside className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-semibold text-slate-950">Order summary</h2>
-            <dl className="mt-4 space-y-3 text-sm text-slate-600">
+          <aside className="rounded-[var(--rounded-lg)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] p-6 h-fit">
+            <h2 className="text-lg font-semibold text-[var(--color-ink)]">Order summary</h2>
+            <dl className="mt-4 space-y-3 text-sm text-[var(--color-ink-muted-80)]">
               <div className="flex items-center justify-between gap-3">
                 <dt>Currency</dt>
                 <dd>{cart.summary.currencyCode}</dd>
@@ -107,18 +109,18 @@ export default async function CartPage({
                 <dt>Distinct items</dt>
                 <dd>{cart.summary.distinctItems}</dd>
               </div>
-              <div className="flex items-center justify-between gap-3 border-t border-slate-200 pt-3 text-base font-semibold text-slate-950">
+              <div className="flex items-center justify-between gap-3 border-t border-[var(--color-hairline)] pt-3 text-base font-semibold text-[var(--color-ink)]">
                 <dt>Subtotal</dt>
                 <dd>{formatCurrency(cart.summary.subtotal, cart.summary.currencyCode)}</dd>
               </div>
             </dl>
 
-            <Link href="/checkout" className="mt-6 inline-flex w-full justify-center rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+            <Link href="/checkout" className="mt-6 inline-flex w-full justify-center rounded-[var(--rounded-pill)] bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-focus)]">
               Continue to checkout
             </Link>
           </aside>
         </div>
       )}
-    </div>
+    </main>
   );
 }

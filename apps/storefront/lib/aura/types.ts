@@ -143,6 +143,7 @@ export interface ProductCardModel {
   description: string;
   imageUrl?: string | null;
   categoryLabel: string;
+  categorySlug?: string;
   tagLabels: string[];
   priceAmount: number;
   priceCurrencyCode: string;

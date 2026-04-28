@@ -14,9 +14,9 @@ const navigation = [
 export function SiteHeader({ user }: { user: AuthenticatedUser | null }) {
   return (
     <>
-      <GlobalNav />
-      <SubNav category="Store" />
-      <div className="pt-[103px]" />
+      {/* <GlobalNav />
+      <SubNav category="Store" /> */}
+      {/* <div className="pt-[103px]" /> */}
       <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
         <div className="mx-auto flex w-full max-w-6xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-6">

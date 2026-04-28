@@ -42,6 +42,10 @@
 
   --font-sf-display: 'SF Pro Display', system-ui, -apple-system, sans-serif;
   --font-sf-text: 'SF Pro Text', system-ui, -apple-system, sans-serif;
+
+  --typography-display-md-font-size: 34px;
+  --typography-display-md-line-height: 1.47;
+  --typography-display-md-letter-spacing: -0.374px;
 }
 
 @theme inline {

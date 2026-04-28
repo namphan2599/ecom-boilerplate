@@ -33,6 +33,7 @@ export function toProductCard(
     description: product.description ?? 'Aura catalog product',
     imageUrl: product.imageUrl,
     categoryLabel: product.category?.name ?? 'Aura catalog',
+    categorySlug: product.category?.slug,
     tagLabels: product.tags.map((tag) => tag.name),
     priceAmount: primaryPrice.amount,
     priceCurrencyCode: primaryPrice.currencyCode,

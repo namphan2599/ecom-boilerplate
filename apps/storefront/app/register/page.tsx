@@ -4,7 +4,7 @@ import { getSession } from '@/lib/auth/session';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
-export default async function LoginPage({
+export default async function RegisterPage({
   searchParams,
 }: {
   searchParams?: SearchParams;
@@ -25,26 +25,28 @@ export default async function LoginPage({
     <main className="mx-auto max-w-[980px] px-4 py-12">
       <div className="grid gap-8 lg:grid-cols-[1fr_380px]">
         <section className="bg-[var(--color-surface-tile-1)] px-8 py-10 text-[var(--color-on-dark)]">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-primary-on-dark)]">Demo access</p>
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-primary-on-dark)]">Create account</p>
           <h1 className="mt-3 text-[34px] font-semibold tracking-[-0.374px] leading-[1.47]">
-            Sign in to test Aura's cart and checkout flows.
+            Join Aura to start shopping.
           </h1>
           <p className="mt-4 max-w-xl text-[17px] leading-[1.47] text-[var(--color-body-muted)]">
-            The storefront keeps JWTs in a secure cookie and uses Aura's existing <code className="text-[var(--color-primary-on-dark)]">/api/v1/auth/login</code> and <code className="text-[var(--color-primary-on-dark)]">/auth/profile</code> endpoints.
+            Create an account to save your cart, track orders, and enjoy a personalized shopping experience.
           </p>
 
           <div className="mt-8 rounded-[var(--rounded-lg)] border border-[var(--color-hairline)]/20 bg-[var(--color-surface-tile-2)] p-5 text-[14px] text-[var(--color-body-muted)]">
-            <p className="font-semibold text-[var(--color-on-dark)]">Seeded demo credentials</p>
-            <div className="mt-3 space-y-1">
-              <p><code className="text-[var(--color-primary-on-dark)]">customer@aura.local</code> / <code className="text-[var(--color-primary-on-dark)]">Customer123!</code></p>
-              <p><code className="text-[var(--color-primary-on-dark)]">admin@aura.local</code> / <code className="text-[var(--color-primary-on-dark)]">Admin123!</code></p>
-            </div>
+            <p className="font-semibold text-[var(--color-on-dark)]">Why create an account?</p>
+            <ul className="mt-3 list-disc pl-4 space-y-1">
+              <li>Save items to your cart for later</li>
+              <li>Track order history and status</li>
+              <li>Faster checkout experience</li>
+              <li>Access exclusive deals</li>
+            </ul>
           </div>
         </section>
 
         <section className="border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-8 py-10">
-          <h2 className="text-[24px] font-semibold text-[var(--color-ink)]">Welcome back</h2>
-          <p className="mt-2 text-sm text-[var(--color-ink-muted-48)]">Use the local Aura seed account to continue to cart, checkout, and orders.</p>
+          <h2 className="text-[24px] font-semibold text-[var(--color-ink)]">Create your account</h2>
+          <p className="mt-2 text-sm text-[var(--color-ink-muted-48)]">Fill in your details to get started.</p>
 
           {error ? (
             <div className="mt-4 rounded-[var(--rounded-md)] border border-[var(--color-hairline)] bg-[var(--color-surface-pearl)] px-4 py-3 text-sm text-[var(--color-ink-muted-80)]">
@@ -52,7 +54,7 @@ export default async function LoginPage({
             </div>
           ) : null}
 
-          <form action="/api/auth/login" method="post" className="mt-6 grid gap-4">
+          <form action="/api/auth/register" method="post" className="mt-6 grid gap-4">
             <input type="hidden" name="next" value={nextPath} />
 
             <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
@@ -60,7 +62,7 @@ export default async function LoginPage({
               <input
                 type="email"
                 name="email"
-                defaultValue="customer@aura.local"
+                placeholder="you@example.com"
                 required
                 className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-[17px] text-[var(--color-ink)]"
               />
@@ -71,8 +73,21 @@ export default async function LoginPage({
               <input
                 type="password"
                 name="password"
-                defaultValue="Customer123!"
+                placeholder="Create a password"
                 required
+                minLength={8}
+                className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-[17px] text-[var(--color-ink)]"
+              />
+            </label>
+
+            <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
+              Confirm Password
+              <input
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                required
+                minLength={8}
                 className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-[17px] text-[var(--color-ink)]"
               />
             </label>
@@ -81,14 +96,14 @@ export default async function LoginPage({
               type="submit"
               className="mt-2 rounded-[var(--rounded-pill)] bg-[var(--color-primary)] px-5 py-3 text-[17px] font-semibold text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-focus)]"
             >
-              Sign in
+              Create account
             </button>
           </form>
 
           <p className="mt-5 text-center text-sm text-[var(--color-ink-muted-48)]">
-            Don't have an account?{' '}
-            <Link href="/register" className="font-medium text-[var(--color-primary)] hover:underline">
-              Create one
+            Already have an account?{' '}
+            <Link href="/login" className="font-medium text-[var(--color-primary)] hover:underline">
+              Sign in
             </Link>
           </p>
 

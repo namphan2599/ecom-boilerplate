@@ -10,51 +10,53 @@ export default async function OrdersPage() {
   const { items, total } = await getOrderHistory(session.token);
 
   return (
-    <div className="space-y-6">
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-cyan-700">Account</p>
-        <h1 className="mt-2 text-3xl font-semibold text-slate-950">Order history</h1>
-        <p className="mt-2 text-sm text-slate-600">
+    <main className="mx-auto max-w-[980px] px-4 py-12">
+      <section className="pb-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.2em] text-[var(--color-primary)]">Account</p>
+        <h1 className="mt-2 text-[34px] font-semibold tracking-[-0.374px] leading-[1.47] text-[var(--color-ink)]">
+          Order history
+        </h1>
+        <p className="mt-2 text-sm text-[var(--color-ink-muted-48)]">
           {session.user.email} · {total} order(s) available from Aura.
         </p>
       </section>
 
       {items.length === 0 ? (
-        <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 p-10 text-center text-slate-600">
+        <div className="rounded-[var(--rounded-lg)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] p-10 text-center text-[var(--color-ink-muted-80)]">
           <p>No orders have been created yet for this account.</p>
-          <Link href="/products" className="mt-4 inline-flex rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white">
+          <Link href="/products" className="mt-4 inline-block rounded-[var(--rounded-pill)] bg-[var(--color-primary)] px-5 py-3 text-sm font-semibold text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-focus)]">
             Start shopping
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
+        <section className="space-y-0">
           {items.map((order) => (
-            <article key={order.orderNumber} className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            <article key={order.orderNumber} className="border-b border-[var(--color-hairline)] py-6 last:border-0">
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div>
-                  <p className="text-sm font-semibold text-slate-950">{order.orderNumber}</p>
-                  <p className="text-sm text-slate-600">Placed {formatDateTime(order.createdAt)}</p>
+                  <p className="text-lg font-semibold text-[var(--color-ink)]">{order.orderNumber}</p>
+                  <p className="text-sm text-[var(--color-ink-muted-48)]">Placed {formatDateTime(order.createdAt)}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-medium text-slate-700">{order.status}</p>
-                  <p className="text-xs text-slate-500">Payment: {order.paymentStatus}</p>
+                  <p className="text-sm font-medium text-[var(--color-ink-muted-80)]">{order.status}</p>
+                  <p className="text-xs text-[var(--color-ink-muted-48)]">Payment: {order.paymentStatus}</p>
                 </div>
               </div>
 
-              <div className="mt-4 grid gap-2 text-sm text-slate-600 md:grid-cols-2">
-                <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                  <p className="font-medium text-slate-900">Total</p>
+              <div className="mt-4 grid gap-3 text-sm md:grid-cols-2">
+                <div className="rounded-[var(--rounded-md)] bg-[var(--color-canvas-parchment)] px-4 py-3 text-[var(--color-ink-muted-80)]">
+                  <p className="font-semibold text-[var(--color-ink)]">Total</p>
                   <p>{formatCurrency(order.grandTotal, order.currencyCode)}</p>
                 </div>
-                <div className="rounded-2xl bg-slate-50 px-4 py-3">
-                  <p className="font-medium text-slate-900">Items</p>
+                <div className="rounded-[var(--rounded-md)] bg-[var(--color-canvas-parchment)] px-4 py-3 text-[var(--color-ink-muted-80)]">
+                  <p className="font-semibold text-[var(--color-ink)]">Items</p>
                   <p>{order.items.length} line(s)</p>
                 </div>
               </div>
             </article>
           ))}
-        </div>
+        </section>
       )}
-    </div>
+    </main>
   );
 }
