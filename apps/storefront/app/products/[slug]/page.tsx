@@ -4,7 +4,6 @@ import { notFound } from 'next/navigation';
 import { addToCartAction } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { PriceBadge } from '@/components/catalog/price-badge';
 import { getProductBySlug } from '@/lib/aura/client';
 import { getPrimaryPrice } from '@/lib/aura/mappers';
 import type { CatalogProductView } from '@/lib/aura/types';
@@ -26,149 +25,163 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
   const price = getPrimaryPrice(product);
 
   return (
-    <div className="space-y-16">
-      <div>
+    <div className="min-h-screen bg-[var(--color-canvas)]">
+      {/* Breadcrumb */}
+      <section className="px-6 py-4">
         <Link
-          href="/store"
-          className="inline-flex items-center gap-1 text-sm font-medium text-[#0066cc] hover:underline"
+          href="/products"
+          className="text-sm text-[var(--color-primary)] hover:underline"
         >
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M9.5 3.5L4.5 7L9.5 10.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Store
+          ← Back to Store
         </Link>
-      </div>
+      </section>
 
-      <div className="grid gap-16 lg:grid-cols-[1.2fr_1fr] lg:gap-24">
-        <div className="relative">
-          <div className="overflow-hidden rounded-[32px] bg-[#f5f5f7]">
-            {product.imageUrl ? (
-              <div className="relative aspect-square w-full">
-                <Image
-                  src={product.imageUrl}
-                  alt={product.name}
-                  fill
-                  unoptimized
-                  className="object-cover"
-                />
-              </div>
-            ) : (
-              <div className="flex aspect-square items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-cyan-700 text-4xl font-semibold text-white">
+      {/* Product Hero */}
+      <div className="grid gap-12 px-6 pb-16 lg:grid-cols-[1.1fr_0.9fr] lg:gap-24">
+        {/* Image */}
+        <div className="relative aspect-square overflow-hidden rounded-lg bg-[var(--color-surface-pearl)]">
+          {product.imageUrl ? (
+            <Image
+              src={product.imageUrl}
+              alt={product.name}
+              fill
+              unoptimized
+              className="object-cover shadow-[rgba(0,0,0,0.22)_3px_5px_30px]"
+            />
+          ) : (
+            <div className="flex items-center justify-center bg-gradient-to-br from-[var(--color-surface-tile-1)] to-[var(--color-surface-tile-2)]">
+              <span className="text-4xl font-semibold text-[var(--color-on-dark)]">
                 Aura
-              </div>
-            )}
-          </div>
-          <div className="pointer-events-none absolute inset-0 rounded-[32px] shadow-[rgba(0,0,0,0.22)_3px_5px_30px]" />
+              </span>
+            </div>
+          )}
         </div>
 
-        <div className="flex flex-col justify-center space-y-8">
-          <div className="space-y-4">
-            <p className="text-lg font-semibold text-[#86868b]">{product.category?.name ?? 'Aura Catalog'}</p>
-            <h1 className="text-5xl font-semibold leading-[1.1] text-[#1d1d1f]">{product.name}</h1>
-            <p className="text-xl leading-relaxed text-[#86868b]">
-              {product.description ?? 'A dependable Aura catalog item ready for local storefront integration.'}
+        {/* Details */}
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <div className="flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-widest text-[var(--color-ink-muted-80)]">
+              <span>{product.category?.name ?? 'Aura'}</span>
+              {product.isFeatured && <span>New</span>}
+            </div>
+            <h1 className="text-[40px] font-semibold tracking-tight text-[var(--color-ink)]">
+              {product.name}
+            </h1>
+            <p className="text-lg leading-relaxed text-[var(--color-ink-muted-80)]">
+              {product.description ?? 'A dependable Aura product.'}
             </p>
           </div>
 
-          <PriceBadge
-            amount={price.amount}
-            currencyCode={price.currencyCode}
-            compareAtAmount={price.compareAtAmount}
-          />
+          <div className="text-[28px] font-semibold text-[var(--color-ink)]">
+            {price.currencyCode === 'USD' ? '$' : ''}
+            {price.amount.toFixed(2)}
+          </div>
 
           <div className="flex flex-wrap gap-2">
             {product.tags.map((tag) => (
               <span
                 key={tag.id}
-                className="rounded-full bg-[#f5f5f7] px-4 py-1.5 text-sm font-medium text-[#86868b]"
+                className="rounded-full bg-[var(--color-surface-pearl)] px-3 py-1 text-sm text-[var(--color-ink-muted-80)]"
               >
                 {tag.name}
               </span>
             ))}
           </div>
 
+          {/* Add to Cart */}
           {session ? (
-            <form action={addToCartAction} className="space-y-5 rounded-3xl border border-[#d2d2d7] p-6">
+            <form action={addToCartAction} className="space-y-4 rounded-lg border border-[var(--color-hairline)] bg-[var(--color-surface-pearl)] p-6">
               <input type="hidden" name="returnPath" value={`/products/${product.slug}`} />
               <input type="hidden" name="currencyCode" value={price.currencyCode} />
 
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-[#1d1d1f]">Select Model</label>
-                <div className="flex flex-wrap gap-2">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[var(--color-ink)]">Option</label>
+                <select
+                  name="sku"
+                  className="w-full rounded-pill border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-sm text-[var(--color-ink)]"
+                >
                   {product.variants.map((variant) => (
-                    <label
-                      key={variant.id}
-                      className="cursor-pointer rounded-full border border-[#d2d2d7] px-4 py-2 text-sm font-medium text-[#1d1d1f] hover:border-[#0066cc] hover:text-[#0066cc]"
-                    >
-                      <input type="radio" name="sku" value={variant.sku} className="sr-only" />
-                      {variant.title}
-                    </label>
+                    <option key={variant.id} value={variant.sku}>
+                      {variant.title} · {variant.sku}
+                    </option>
                   ))}
-                </div>
+                </select>
               </div>
 
-              <div className="space-y-3">
-                <label className="text-sm font-semibold text-[#1d1d1f]">Quantity</label>
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-[var(--color-ink)]">
+                  Quantity
+                </label>
                 <Input
                   type="number"
-                  min={1}
                   name="quantity"
+                  min={1}
                   defaultValue={1}
-                  className="max-w-32"
                 />
               </div>
 
-              <Button type="submit" className="w-full rounded-full text-base">
+              <Button type="submit" className="w-full">
                 Add to Bag
               </Button>
             </form>
           ) : (
-            <div className="rounded-3xl border border-dashed border-[#d2d2d7] bg-[#f5f5f7] p-6">
-              <p className="text-[#86868b]">Sign in with the seeded demo account before adding items to the Aura cart.</p>
-              <Link
-                href={`/login?next=/products/${product.slug}`}
-                className="mt-4 inline-flex rounded-full bg-[#0071e3] px-6 py-3 text-base font-semibold text-white hover:bg-[#0077ed]"
-              >
-                Sign in to buy
+            <div className="rounded-lg border border-dashed border-[var(--color-hairline)] bg-[var(--color-surface-pearl)] p-6">
+              <p className="mb-4 text-[var(--color-ink-muted-80)]">
+                Sign in to purchase.
+              </p>
+              <Link href={`/login?next=/products/${product.slug}`}>
+                <Button>Sign in to buy</Button>
               </Link>
             </div>
           )}
         </div>
       </div>
 
-      <section className="rounded-3xl border border-[#d2d2d7] bg-[#f5f5f7] p-8">
-        <h2 className="text-4xl font-semibold text-[#1d1d1f]">Technical Specifications</h2>
-        <div className="mt-8 grid gap-6 md:grid-cols-2">
-          {product.variants.map((variant) => {
-            const variantPrice = getPrimaryPrice({ ...product, variants: [variant] }, price.currencyCode);
-            return (
-              <div key={variant.id} className="rounded-2xl border border-[#d2d2d7] bg-white p-6">
-                <div className="mb-4 flex items-center justify-between border-b border-[#d2d2d7] pb-4">
+      {/* Variants Table */}
+      <section className="border-t border-[var(--color-hairline)] bg-[var(--color-canvas-parchment)] px-6 py-12">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="mb-6 text-[28px] font-semibold text-[var(--color-ink)]">
+            Technical Specifications
+          </h2>
+          <div className="space-y-4">
+            {product.variants.map((variant) => {
+              const variantPrice = getPrimaryPrice(
+                { ...product, variants: [variant] },
+                price.currencyCode
+              );
+              return (
+                <div
+                  key={variant.id}
+                  className="flex items-center justify-between rounded-lg border border-[var(--color-hairline)] bg-[var(--color-canvas)] p-4"
+                >
                   <div>
-                    <p className="text-lg font-semibold text-[#1d1d1f]">{variant.title}</p>
-                    <p className="text-sm text-[#86868b]">Model {variant.sku}</p>
-                  </div>
-                  <PriceBadge
-                    amount={variantPrice.amount}
-                    currencyCode={variantPrice.currencyCode}
-                    compareAtAmount={variantPrice.compareAtAmount}
-                  />
-                </div>
-                <dl className="space-y-3">
-                  {Object.entries(variant.attributes).map(([key, value]) => (
-                    <div key={key} className="flex justify-between">
-                      <dt className="text-sm font-medium text-[#86868b] capitalize">{key}</dt>
-                      <dd className="text-sm font-medium text-[#1d1d1f]">{value}</dd>
+                    <p className="font-semibold text-[var(--color-ink)]">
+                      {variant.title}
+                    </p>
+                    <p className="text-sm text-[var(--color-ink-muted-48)]">
+                      SKU {variant.sku}
+                    </p>
+                    <div className="mt-2 space-y-1">
+                      {Object.entries(variant.attributes).map(([key, value]) => (
+                        <p key={key} className="text-sm text-[var(--color-ink-muted-80)]">
+                          <span className="capitalize">{key}</span>: {value}
+                        </p>
+                      ))}
+                      <p className="text-sm text-[var(--color-ink-muted-48)]">
+                        Stock: {variant.inventoryOnHand}
+                      </p>
                     </div>
-                  ))}
-                  <div className="flex justify-between pt-2">
-                    <dt className="text-sm font-medium text-[#86868b]">Availability</dt>
-                    <dd className="text-sm font-medium text-[#1d1d1f]">{variant.inventoryOnHand} in stock</dd>
                   </div>
-                </dl>
-              </div>
-            );
-          })}
+                  <div className="text-right">
+                    <p className="text-lg font-semibold text-[var(--color-ink)]">
+                      {variantPrice.currencyCode === 'USD' ? '$' : ''}
+                      {variantPrice.amount.toFixed(2)}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       </section>
     </div>

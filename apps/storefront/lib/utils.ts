@@ -1,17 +1,8 @@
-type ClassValue = string | undefined | null | boolean | ClassValue[];
+import { type ClassValue, clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-export function cn(...inputs: ClassValue[]): string {
-  const classes: string[] = [];
-  for (const input of inputs) {
-    if (!input) continue;
-    if (typeof input === 'string') {
-      classes.push(input);
-    } else if (Array.isArray(input)) {
-      const nested = cn(...input);
-      if (nested) classes.push(nested);
-    }
-  }
-  return classes.join(' ');
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
 
 export function formatCurrency(amount: number, currencyCode = 'USD'): string {

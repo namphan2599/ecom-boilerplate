@@ -2,55 +2,60 @@ import Image from 'next/image';
 import Link from 'next/link';
 import type { ProductCardModel } from '@/lib/aura/types';
 import { PriceBadge } from './price-badge';
+import { Button } from '@/components/ui/button';
 
 export function ProductCard({ product }: { product: ProductCardModel }) {
   return (
-    <article className="overflow-hidden rounded-[18px] border border-[#e0e0e0] bg-white transition hover:shadow-lg">
-      <Link href={`/products/${product.slug}`} className="block">
+    <article className="group">
+      <Link href={`/products/${product.slug}`}>
         {product.imageUrl ? (
-          <div className="relative h-52 w-full bg-[#f5f5f7]">
+          <div className="relative mb-4 aspect-square overflow-hidden rounded-lg bg-[var(--color-divider-soft)]">
             <Image
               src={product.imageUrl}
               alt={product.name}
               fill
               unoptimized
-              className="object-cover transition-transform duration-300 hover:scale-105"
+              className="object-cover transition-transform group-hover:scale-105"
             />
           </div>
         ) : (
-          <div className="flex h-52 items-center justify-center bg-linear-to-br from-[#1d1d1f] via-[#434344] to-[#0066cc] text-lg font-semibold text-white">
-            Aura
+          <div className="mb-4 flex aspect-square items-center justify-center rounded-lg bg-gradient-to-br from-[var(--color-surface-tile-1)] to-[var(--color-surface-tile-2)]">
+            <span className="text-lg font-semibold text-[var(--color-on-dark)]">Aura</span>
           </div>
         )}
       </Link>
 
-      <div className="space-y-4 p-5">
-        <div className="space-y-2">
-          <div className="flex items-center justify-between gap-3">
-            <span className="rounded-full bg-[#f5f5f7] px-2.5 py-1 text-xs font-medium text-[#1d1d1f]">
-              {product.categoryLabel}
+      <div className="space-y-2">
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-[var(--color-surface-pearl)] px-2.5 py-1 text-xs font-medium text-[var(--color-ink-muted-80)]">
+            {product.categoryLabel}
+          </span>
+          {product.featured && (
+            <span className="text-xs font-semibold text-[var(--color-primary)]">
+              New
             </span>
-            {product.featured ? (
-              <span className="rounded-full bg-[#0066cc]/10 px-2.5 py-1 text-xs font-semibold text-[#0066cc]">
-                Featured
-              </span>
-            ) : null}
-          </div>
-
-          <Link href={`/products/${product.slug}`} className="block text-lg font-semibold text-[#1d1d1f] hover:text-[#0066cc]">
-            {product.name}
-          </Link>
-
-          <p className="line-clamp-2 text-sm text-[#86868b]">{product.description}</p>
+          )}
         </div>
 
-        <div className="flex items-center justify-between gap-3">
+        <Link href={`/products/${product.slug}`} className="block">
+          <h3 className="text-[17px] font-semibold text-[var(--color-ink)] group-hover:text-[var(--color-primary)]">
+            {product.name}
+          </h3>
+        </Link>
+
+        <p className="line-clamp-2 text-sm text-[var(--color-ink-muted-80)]">
+          {product.description}
+        </p>
+
+        <div className="flex items-center justify-between pt-2">
           <PriceBadge
             amount={product.priceAmount}
             currencyCode={product.priceCurrencyCode}
             compareAtAmount={product.compareAtAmount}
           />
-          <span className="text-xs text-[#86868b]">{product.variantCount} variant(s)</span>
+          <Button size="sm" variant="ghost" className="text-sm">
+            {product.variantCount} options
+          </Button>
         </div>
       </div>
     </article>
