@@ -1,6 +1,6 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { compare } from 'bcryptjs';
+import { compare, hash } from 'bcryptjs';
 import { PrismaService } from '../prisma/prisma.service';
 import { AppRole } from '../common/auth/role.enum';
 import { SEED_LOCAL_USERS } from '../seeding/fixtures/users.fixtures';
@@ -106,5 +106,37 @@ export class AuthService {
       displayName: profile.displayName ?? email,
       provider: 'google',
     };
+  }
+
+  async register(data: {
+    email: string;
+    password: string;
+    firstName?: string;
+    lastName?: string;
+  }): Promise<AuthTokenResponse> {
+    const normalizedEmail = data.email.trim().toLowerCase();
+    const passwordHash = await hash(data.password, 12);
+
+    const user = await this.prisma.user.create({
+      data: {
+        email: normalizedEmail,
+        passwordHash,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        role: AppRole.CUSTOMER,
+        isActive: true,
+      },
+    });
+
+    const authenticatedUser: AuthenticatedUser = {
+      userId: user.id,
+      email: user.email,
+      role: user.role as AppRole,
+      displayName:
+        [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email,
+      provider: 'local',
+    };
+
+    return this.issueToken(authenticatedUser);
   }
 }
