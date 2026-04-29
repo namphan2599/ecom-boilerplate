@@ -1,7 +1,7 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
-import { PrismaService } from '../prisma/prisma.service';
+import { Prisma, PrismaService } from '../prisma/prisma.service';
 import { AppRole } from '../common/auth/role.enum';
 import { SEED_LOCAL_USERS } from '../seeding/fixtures/users.fixtures';
 
@@ -117,16 +117,26 @@ export class AuthService {
     const normalizedEmail = data.email.trim().toLowerCase();
     const passwordHash = await hash(data.password, 12);
 
-    const user = await this.prisma.user.create({
-      data: {
-        email: normalizedEmail,
-        passwordHash,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        role: AppRole.CUSTOMER,
-        isActive: true,
-      },
-    });
+    let user;
+    try {
+      user = await this.prisma.user.create({
+        data: {
+          email: normalizedEmail,
+          passwordHash,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          role: AppRole.CUSTOMER,
+          isActive: true,
+        },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new ConflictException('Email already registered');
+        }
+      }
+      throw error;
+    }
 
     const authenticatedUser: AuthenticatedUser = {
       userId: user.id,
