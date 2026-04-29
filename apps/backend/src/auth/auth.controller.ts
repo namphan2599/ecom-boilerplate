@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiConflictResponse,
   ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
@@ -17,6 +18,7 @@ import {
 import { AuthService } from './auth.service';
 import type { AuthenticatedUser, AuthTokenResponse } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { LocalAuthGuard } from './guards/local-auth.guard';
@@ -69,6 +71,52 @@ export class AuthController {
   })
   login(@Req() req: Request & { user: AuthenticatedUser }): AuthTokenResponse {
     return this.authService.issueToken(req.user);
+  }
+
+  @Post('register')
+  @ApiOperation({ summary: 'Register a new user account' })
+  @ApiBody({
+    type: RegisterDto,
+    description: 'User registration details',
+    examples: {
+      default: {
+        summary: 'New user registration',
+        value: {
+          email: 'newuser@example.com',
+          password: 'Password123!',
+          firstName: 'John',
+          lastName: 'Doe',
+        },
+      },
+    },
+  })
+  @ApiCreatedResponse({
+    description: 'Returns a JWT access token and authenticated user profile.',
+    schema: {
+      example: {
+        accessToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        tokenType: 'Bearer',
+        expiresIn: '15m',
+        user: {
+          userId: 'new-user-id',
+          email: 'newuser@example.com',
+          role: 'CUSTOMER',
+          displayName: 'John Doe',
+          provider: 'local',
+        },
+      },
+    },
+  })
+  @ApiBadRequestResponse({
+    description: 'Validation failed for the registration request body.',
+    type: ValidationErrorResponseDto,
+  })
+  @ApiConflictResponse({
+    description: 'Email already registered.',
+    type: ApiErrorResponseDto,
+  })
+  async register(@Body() dto: RegisterDto): Promise<AuthTokenResponse> {
+    return this.authService.register(dto);
   }
 
   @Get('google')
