@@ -75,7 +75,7 @@ export default async function RegisterPage({
                 name="password"
                 placeholder="Create a password"
                 required
-                minLength={8}
+                minLength={3}
                 className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-[17px] text-[var(--color-ink)]"
               />
             </label>
