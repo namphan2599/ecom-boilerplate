@@ -1,5 +1,5 @@
-import { getAuthToken } from '@/lib/auth/session';
-import { getCart } from '@/lib/aura/client';
+import { getAuthToken } from '@/lib/auth';
+import { getCart } from '@/lib/cart';
 import { NextResponse } from 'next/server';
 
 export async function GET() {

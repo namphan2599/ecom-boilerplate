@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import type { CartView } from '@/lib/aura/types';
+import type { CartView } from '@/lib/types';
 
 interface CartContextValue {
   cart: CartView | null;

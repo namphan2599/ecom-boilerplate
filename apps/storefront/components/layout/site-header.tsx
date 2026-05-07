@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { AuthenticatedUser } from '@/lib/aura/types';
+import type { AuthenticatedUser } from '@/lib/types';
 import { formatRoleLabel } from '@/lib/utils';
 import { GlobalNav } from './global-nav';
 import { SubNav } from './sub-nav';

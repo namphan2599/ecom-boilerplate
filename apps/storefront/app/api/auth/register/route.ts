@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { registerWithPassword } from '@/lib/aura/client';
-import { ACCESS_TOKEN_COOKIE, buildAuthCookieOptions } from '@/lib/auth/session';
+import { registerWithPassword } from '@/lib/auth';
+import { ACCESS_TOKEN_COOKIE, buildAuthCookieOptions } from '@/lib/auth';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const contentType = request.headers.get('content-type') ?? '';

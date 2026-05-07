@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { startCheckoutAction } from '@/app/actions';
-import { getCart } from '@/lib/aura/client';
-import { requireSession } from '@/lib/auth/session';
+import { getCart } from '@/lib/cart';
+import { requireSession } from '@/lib/auth';
 import { formatCurrency } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';

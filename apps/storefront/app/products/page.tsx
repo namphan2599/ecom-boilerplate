@@ -1,5 +1,5 @@
-import { getCatalogProducts, getCategories } from '@/lib/aura/client';
-import { toProductCard } from '@/lib/aura/mappers';
+import { getCatalogProducts, getCategories } from '@/lib/product';
+import { toProductCard } from '@/lib/mappers';
 import { ProductList } from '@/components/catalog/product-list';
 
 export default async function ProductsPage() {

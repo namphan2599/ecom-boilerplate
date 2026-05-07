@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { loginWithPassword } from '@/lib/aura/client';
-import { ACCESS_TOKEN_COOKIE, buildAuthCookieOptions } from '@/lib/auth/session';
+import { loginWithPassword } from '@/lib/auth';
+import { ACCESS_TOKEN_COOKIE, buildAuthCookieOptions } from '@/lib/auth';
 
 function safeNextPath(nextPath: string | null | undefined): string {
   if (!nextPath || !nextPath.startsWith('/')) {

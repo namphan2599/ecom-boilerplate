@@ -4,11 +4,11 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import {
   addCartItem,
-  createCheckoutSession,
   removeCartItem,
   updateCartItem,
-} from '@/lib/aura/client';
-import { requireSession } from '@/lib/auth/session';
+} from '@/lib/cart';
+import { createCheckoutSession } from '@/lib/checkout';
+import { requireSession } from '@/lib/auth';
 
 const STOREFRONT_URL =
   process.env.NEXT_PUBLIC_STOREFRONT_URL ?? 'http://localhost:3001';

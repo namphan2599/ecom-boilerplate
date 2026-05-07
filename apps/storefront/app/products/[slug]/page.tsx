@@ -5,10 +5,10 @@ import { addToCartAction } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AddToCartButton } from '@/components/catalog/add-to-cart-button';
-import { getProductBySlug } from '@/lib/aura/client';
-import { getPrimaryPrice } from '@/lib/aura/mappers';
-import type { CatalogProductView } from '@/lib/aura/types';
-import { getSession } from '@/lib/auth/session';
+import { getProductBySlug } from '@/lib/product';
+import { getPrimaryPrice } from '@/lib/mappers';
+import type { CatalogProductView } from '@/lib/types';
+import { getSession } from '@/lib/auth';
 
 type Params = Promise<{ slug: string }>;
 

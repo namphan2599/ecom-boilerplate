@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getCart, getCatalogProducts, getProductBySlug } from '@/lib/aura/client';
+import { getCatalogProducts, getProductBySlug } from '@/lib/product';
+import { getCart } from '@/lib/cart';
 
 describe('Aura API client fallback behavior', () => {
   const originalFetch = global.fetch;

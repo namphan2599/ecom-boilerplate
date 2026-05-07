@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { ProductCard } from '@/components/catalog/product-card';
 import { Button } from '@/components/ui/button';
-import { getCatalogProducts } from '@/lib/aura/client';
-import { toProductCard } from '@/lib/aura/mappers';
+import { getCatalogProducts } from '@/lib/product';
+import { toProductCard } from '@/lib/mappers';
 
 export default async function Home() {
   const { items } = await getCatalogProducts();

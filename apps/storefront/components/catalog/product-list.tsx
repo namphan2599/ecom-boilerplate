@@ -5,7 +5,7 @@ import { useTransition, useState, useEffect } from 'react';
 import { ProductCard } from '@/components/catalog/product-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import type { ProductCardModel } from '@/lib/aura/types';
+import type { ProductCardModel } from '@/lib/types';
 
 interface ProductListProps {
   products: ProductCardModel[];

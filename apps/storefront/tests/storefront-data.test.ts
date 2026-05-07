@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { FALLBACK_PRODUCTS } from '@/lib/aura/fallback-data';
-import { filterProducts, getPrimaryPrice, toProductCard } from '@/lib/aura/mappers';
+import { FALLBACK_PRODUCTS } from '@/lib/fallback';
+import { filterProducts, getPrimaryPrice, toProductCard } from '@/lib/mappers';
 
 describe('storefront data mappers', () => {
   it('maps a catalog product into a product card model', () => {

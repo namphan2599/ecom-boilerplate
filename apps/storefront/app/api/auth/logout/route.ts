@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ACCESS_TOKEN_COOKIE, buildAuthCookieOptions } from '@/lib/auth/session';
+import { ACCESS_TOKEN_COOKIE, buildAuthCookieOptions } from '@/lib/auth';
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   const response = NextResponse.redirect(new URL('/', request.url));

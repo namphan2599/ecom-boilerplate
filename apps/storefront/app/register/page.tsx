@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { getSession } from '@/lib/auth/session';
+import { getSession } from '@/lib/auth';
 import { RegisterForm } from './RegisterForm';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;

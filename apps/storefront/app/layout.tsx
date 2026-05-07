@@ -4,8 +4,9 @@ import { PageShell } from '@/components/layout/page-shell';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
 import { CartProvider } from '@/lib/cart/context';
-import { getProfile, getCart } from '@/lib/aura/client';
-import { getSession } from '@/lib/auth/session';
+import { getProfile } from '@/lib/auth';
+import { getCart } from '@/lib/cart';
+import { getSession } from '@/lib/auth';
 import './globals.css';
 
 const geistSans = Geist({

@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { getOrderHistory } from '@/lib/aura/client';
-import { requireSession } from '@/lib/auth/session';
+import { getOrderHistory } from '@/lib/order';
+import { requireSession } from '@/lib/auth';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';

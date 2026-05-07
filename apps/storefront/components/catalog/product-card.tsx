@@ -1,6 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import type { ProductCardModel } from '@/lib/aura/types';
+import type { ProductCardModel } from '@/lib/types';
 import { PriceBadge } from './price-badge';
 import { Button } from '@/components/ui/button';
 

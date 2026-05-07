@@ -82,10 +82,12 @@ export function AddToCartButton({ children }: { children: React.ReactNode }) {
     end: { x: number; y: number };
   } | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
-    const form = formRef.current;
+    const button = buttonRef.current;
+    if (!button) return;
+
+    const form = button.closest('form');
     if (!form) return;
 
     const handleSubmit = () => {
@@ -119,37 +121,35 @@ export function AddToCartButton({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <form ref={formRef} className="contents">
-        <button
-          ref={buttonRef}
-          type="submit"
-          disabled={pending}
-          className="relative w-full overflow-hidden rounded-pill bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
-          onClick={handleClick}
-        >
-          <span className={pending ? 'opacity-0' : ''}>{children}</span>
-          {pending && (
-            <span className="absolute inset-0 flex items-center justify-center">
-              <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                  fill="none"
-                />
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-                />
-              </svg>
-            </span>
-          )}
-        </button>
-      </form>
+      <button
+        ref={buttonRef}
+        type="submit"
+        disabled={pending}
+        className="relative w-full overflow-hidden rounded-pill bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
+        onClick={handleClick}
+      >
+        <span className={pending ? 'opacity-0' : ''}>{children}</span>
+        {pending && (
+          <span className="absolute inset-0 flex items-center justify-center">
+            <svg className="h-5 w-5 animate-spin" viewBox="0 0 24 24">
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+                fill="none"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          </span>
+        )}
+      </button>
       {showAnimation && flyingPosition && (
         <FlyingItem
           startPosition={flyingPosition.start}

@@ -50,14 +50,14 @@ export function CartButton() {
       >
         <BagIcon className="h-5 w-5" />
         {totalCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+          <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black text-xs font-medium text-white">
             {totalCount > 99 ? '99+' : totalCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
+        <div className="absolute left-0 top-full z-50 mt-2 w-72 rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
           <h3 className="mb-3 text-sm font-semibold text-slate-900">Shopping Bag</h3>
           
           {(!cart?.items || cart.items.length === 0) ? (
