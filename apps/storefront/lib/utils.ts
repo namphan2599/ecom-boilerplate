@@ -23,3 +23,14 @@ export function formatDateTime(input: string): string {
 export function formatRoleLabel(role: string): string {
   return role.charAt(0) + role.slice(1).toLowerCase();
 }
+
+export function escapeHtml(text: string): string {
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (char) => map[char]);
+}

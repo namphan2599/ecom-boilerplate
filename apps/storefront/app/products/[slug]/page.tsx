@@ -1,10 +1,8 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { addToCartAction } from '@/app/actions';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { AddToCartButton } from '@/components/catalog/add-to-cart-button';
+import { AddToCartForm } from '@/components/catalog/add-to-cart-form';
 import { getProductBySlug } from '@/lib/product';
 import { getPrimaryPrice } from '@/lib/mappers';
 import type { CatalogProductView } from '@/lib/types';
@@ -91,38 +89,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
 
           {/* Add to Cart */}
           {session ? (
-            <form action={addToCartAction} className="space-y-4 rounded-lg border border-[var(--color-hairline)] bg-[var(--color-surface-pearl)] p-6">
-              <input type="hidden" name="returnPath" value={`/products/${product.slug}`} />
-              <input type="hidden" name="currencyCode" value={price.currencyCode} />
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-[var(--color-ink)]">Option</label>
-                <select
-                  name="sku"
-                  className="w-full rounded-pill border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-sm text-[var(--color-ink)]"
-                >
-                  {product.variants.map((variant) => (
-                    <option key={variant.id} value={variant.sku}>
-                      {variant.title} · {variant.sku}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-[var(--color-ink)]">
-                  Quantity
-                </label>
-                <Input
-                  type="number"
-                  name="quantity"
-                  min={1}
-                  defaultValue={1}
-                />
-              </div>
-
-              <AddToCartButton>Add to Bag</AddToCartButton>
-            </form>
+            <AddToCartForm product={product} currencyCode={price.currencyCode} />
           ) : (
             <div className="rounded-lg border border-dashed border-[var(--color-hairline)] bg-[var(--color-surface-pearl)] p-6">
               <p className="mb-4 text-[var(--color-ink-muted-80)]">

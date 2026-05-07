@@ -1,4 +1,4 @@
-import 'server-only';
+
 import { apiFetch } from './client';
 import { FALLBACK_PRODUCTS, FALLBACK_CATEGORIES, FALLBACK_TAGS } from './fallback';
 import type { CatalogListResponse, CatalogProductView } from './types';

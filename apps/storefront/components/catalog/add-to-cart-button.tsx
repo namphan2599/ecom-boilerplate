@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useCart } from '@/lib/cart/context';
 
 function FlyingItem({
   startPosition,
@@ -74,7 +75,15 @@ function FlyingItem({
   );
 }
 
-export function AddToCartButton({ children }: { children: React.ReactNode }) {
+interface AddToCartButtonProps {
+  sku: string;
+  quantity: number;
+  currencyCode?: string;
+  children: React.ReactNode;
+}
+
+export function AddToCartButton({ sku, quantity, currencyCode = 'USD', children }: AddToCartButtonProps) {
+  const { addToCart } = useCart();
   const [pending, setPending] = useState(false);
   const [showAnimation, setShowAnimation] = useState(false);
   const [flyingPosition, setFlyingPosition] = useState<{
@@ -83,26 +92,13 @@ export function AddToCartButton({ children }: { children: React.ReactNode }) {
   } | null>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    const button = buttonRef.current;
-    if (!button) return;
-
-    const form = button.closest('form');
-    if (!form) return;
-
-    const handleSubmit = () => {
-      setPending(true);
-    };
-
-    form.addEventListener('submit', handleSubmit);
-    return () => form.removeEventListener('submit', handleSubmit);
-  }, []);
-
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback(async () => {
     if (pending || !buttonRef.current) return;
 
     const cartButton = document.querySelector('[data-cart-button]');
     if (!cartButton) return;
+
+    setPending(true);
 
     const buttonRect = buttonRef.current.getBoundingClientRect();
     const cartRect = cartButton.getBoundingClientRect();
@@ -112,7 +108,10 @@ export function AddToCartButton({ children }: { children: React.ReactNode }) {
       end: { x: cartRect.left + cartRect.width / 2, y: cartRect.top + cartRect.height / 2 },
     });
     setShowAnimation(true);
-  }, [pending]);
+
+    await addToCart({ sku, quantity, currencyCode });
+    setPending(false);
+  }, [pending, sku, quantity, currencyCode, addToCart]);
 
   const handleComplete = useCallback(() => {
     setShowAnimation(false);
@@ -123,7 +122,7 @@ export function AddToCartButton({ children }: { children: React.ReactNode }) {
     <>
       <button
         ref={buttonRef}
-        type="submit"
+        type="button"
         disabled={pending}
         className="relative w-full overflow-hidden rounded-pill bg-slate-950 px-4 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:opacity-50"
         onClick={handleClick}

@@ -1,4 +1,3 @@
-import 'server-only';
 import { apiFetch } from './client';
 import { createEmptyCart } from './fallback';
 import type { CartView } from './types';

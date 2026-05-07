@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { startCheckoutAction } from '@/app/actions';
 import { getCart } from '@/lib/cart';
 import { requireSession } from '@/lib/auth';
-import { formatCurrency } from '@/lib/utils';
+import { formatCurrency, escapeHtml } from '@/lib/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -45,7 +45,7 @@ export default async function CheckoutPage({
 
           {error ? (
             <div className="mt-4 rounded-[var(--rounded-md)] border border-[var(--color-hairline)] bg-[var(--color-surface-pearl)] px-4 py-3 text-sm text-[var(--color-ink-muted-80)]">
-              {error}
+              {escapeHtml(error)}
             </div>
           ) : null}
 

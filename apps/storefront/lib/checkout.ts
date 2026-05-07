@@ -1,4 +1,4 @@
-import 'server-only';
+
 import { apiFetch } from './client';
 import type { HostedCheckoutSessionView } from './types';
 
