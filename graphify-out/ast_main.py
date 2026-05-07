@@ -1,0 +1,24 @@
+if __name__ == '__main__':
+    import json
+    import multiprocessing
+    try:
+        multiprocessing.set_start_method('spawn', force=True)
+    except RuntimeError:
+        pass
+
+    from graphify.extract import collect_files, extract
+    from pathlib import Path
+
+    code_files = []
+    detect = {"files": {"code": ["apps\\backend\\prisma\\seed.ts", "apps\\backend\\src\\app.controller.spec.ts", "apps\\backend\\src\\app.controller.ts", "apps\\backend\\src\\app.module.ts", "apps\\backend\\src\\app.service.ts", "apps\\backend\\src\\main.ts", "apps\\backend\\src\\auth\\auth.controller.spec.ts", "apps\\backend\\src\\auth\\auth.controller.ts", "apps\\backend\\src\\auth\\auth.module.ts", "apps\\backend\\src\\auth\\auth.service.spec.ts", "apps\\backend\\src\\auth\\auth.service.ts", "apps\\backend\\src\\auth\\dto\\login.dto.ts", "apps\\backend\\src\\auth\\dto\\register.dto.spec.ts", "apps\\backend\\src\\auth\\dto\\register.dto.ts", "apps\\backend\\src\\auth\\guards\\google-auth.guard.ts", "apps\\backend\\src\\auth\\guards\\jwt-auth.guard.ts", "apps\\backend\\src\\auth\\guards\\local-auth.guard.ts", "apps\\backend\\src\\auth\\strategies\\google.strategy.ts", "apps\\backend\\src\\auth\\strategies\\jwt.strategy.ts", "apps\\backend\\src\\auth\\strategies\\local.strategy.ts", "apps\\backend\\src\\cart\\cart.controller.ts", "apps\\backend\\src\\cart\\cart.module.ts", "apps\\backend\\src\\cart\\cart.service.ts", "apps\\backend\\src\\cart\\dto\\add-cart-item.dto.ts", "apps\\backend\\src\\cart\\dto\\update-cart-item.dto.ts", "apps\\backend\\src\\catalog\\catalog.controller.ts", "apps\\backend\\src\\catalog\\catalog.module.ts", "apps\\backend\\src\\catalog\\catalog.service.spec.ts", "apps\\backend\\src\\catalog\\catalog.service.ts", "apps\\backend\\src\\catalog\\dto\\create-product.dto.ts", "apps\\backend\\src\\catalog\\dto\\update-product.dto.ts", "apps\\backend\\src\\common\\auth\\role.enum.ts", "apps\\backend\\src\\common\\auth\\roles.decorator.ts", "apps\\backend\\src\\common\\auth\\roles.guard.ts", "apps\\backend\\src\\common\\filters\\global-exception.filter.ts", "apps\\backend\\src\\common\\http\\api-error-response.dto.ts", "apps\\backend\\src\\discounts\\discounts.controller.ts", "apps\\backend\\src\\discounts\\discounts.module.ts", "apps\\backend\\src\\discounts\\discounts.service.spec.ts", "apps\\backend\\src\\discounts\\discounts.service.ts", "apps\\backend\\src\\discounts\\dto\\create-discount.dto.ts", "apps\\backend\\src\\discounts\\dto\\update-discount.dto.ts", "apps\\backend\\src\\health\\health.controller.ts", "apps\\backend\\src\\health\\health.module.ts", "apps\\backend\\src\\health\\health.service.ts", "apps\\backend\\src\\inventory\\inventory.module.ts", "apps\\backend\\src\\inventory\\inventory.service.spec.ts", "apps\\backend\\src\\inventory\\inventory.service.ts", "apps\\backend\\src\\payments\\checkout.controller.ts", "apps\\backend\\src\\payments\\orders.controller.ts", "apps\\backend\\src\\payments\\payments.integration.spec.ts", "apps\\backend\\src\\payments\\payments.module.ts", "apps\\backend\\src\\payments\\payments.service.spec.ts", "apps\\backend\\src\\payments\\payments.service.ts", "apps\\backend\\src\\payments\\stripe-webhook.controller.ts", "apps\\backend\\src\\payments\\dto\\create-checkout-session.dto.ts", "apps\\backend\\src\\payments\\dto\\update-order-status.dto.ts", "apps\\backend\\src\\prisma\\prisma.module.ts", "apps\\backend\\src\\prisma\\prisma.service.ts", "apps\\backend\\src\\seeding\\seeding.module.ts", "apps\\backend\\src\\seeding\\seeding.service.spec.ts", "apps\\backend\\src\\seeding\\seeding.service.ts", "apps\\backend\\src\\seeding\\fixtures\\catalog.fixtures.ts", "apps\\backend\\src\\seeding\\fixtures\\coupons.fixtures.ts", "apps\\backend\\src\\seeding\\fixtures\\users.fixtures.ts", "apps\\backend\\src\\storage\\storage.module.ts", "apps\\backend\\src\\storage\\storage.service.spec.ts", "apps\\backend\\src\\storage\\storage.service.ts", "apps\\backend\\src\\storage\\storage.types.ts", "apps\\backend\\test\\app.e2e-spec.ts"], "document": [], "paper": [], "image": [], "video": []}, "total_files": 70, "total_words": 18473}
+
+    for f in detect['files']['code']:
+        code_files.extend(collect_files(Path(f)) if Path(f).is_dir() else [Path(f)])
+
+    if code_files:
+        result = extract(code_files)
+        Path('graphify-out/.graphify_ast.json').write_text(json.dumps(result, indent=2))
+        print(f'AST: {len(result["nodes"])} nodes, {len(result["edges"])} edges')
+    else:
+        Path('graphify-out/.graphify_ast.json').write_text(json.dumps({'nodes':[],'edges':[],'input_tokens':0,'output_tokens':0}))
+        print('No code files - skipping AST extraction')

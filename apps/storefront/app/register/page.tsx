@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth/session';
+import { RegisterForm } from './RegisterForm';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -44,7 +45,7 @@ export default async function RegisterPage({
           </div>
         </section>
 
-        <section className="border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-8 py-10">
+<section className="border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-8 py-10">
           <h2 className="text-[24px] font-semibold text-[var(--color-ink)]">Create your account</h2>
           <p className="mt-2 text-sm text-[var(--color-ink-muted-48)]">Fill in your details to get started.</p>
 
@@ -54,63 +55,8 @@ export default async function RegisterPage({
             </div>
           ) : null}
 
-          <form action="/api/auth/register" method="post" className="mt-6 grid gap-4">
-            <input type="hidden" name="next" value={nextPath} />
-
-            <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-              Email
-              <input
-                type="email"
-                name="email"
-                placeholder="you@example.com"
-                required
-                className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-[17px] text-[var(--color-ink)]"
-              />
-            </label>
-
-            <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-              Password
-              <input
-                type="password"
-                name="password"
-                placeholder="Create a password"
-                required
-                minLength={3}
-                className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-[17px] text-[var(--color-ink)]"
-              />
-            </label>
-
-            <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-              Confirm Password
-              <input
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm your password"
-                required
-                minLength={8}
-                className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-[17px] text-[var(--color-ink)]"
-              />
-            </label>
-
-            <button
-              type="submit"
-              className="mt-2 rounded-[var(--rounded-pill)] bg-[var(--color-primary)] px-5 py-3 text-[17px] font-semibold text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-focus)]"
-            >
-              Create account
-            </button>
-          </form>
-
-          <p className="mt-5 text-center text-sm text-[var(--color-ink-muted-48)]">
-            Already have an account?{' '}
-            <Link href="/login" className="font-medium text-[var(--color-primary)] hover:underline">
-              Sign in
-            </Link>
-          </p>
-
-          <Link href="/products" className="mt-6 inline-block text-sm font-medium text-[var(--color-primary)] hover:underline">
-            Continue browsing as guest
-          </Link>
-        </section>
+          <RegisterForm next={nextPath} error={error} />
+</section>
       </div>
     </main>
   );

@@ -1,9 +1,10 @@
 import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare, hash } from 'bcryptjs';
-import { Prisma, PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { AppRole } from '../common/auth/role.enum';
 import { SEED_LOCAL_USERS } from '../seeding/fixtures/users.fixtures';
+import { Prisma } from '@prisma/client';
 
 export interface AuthenticatedUser {
   userId: string;

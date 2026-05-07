@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getSession } from '@/lib/auth/session';
+import { LoginForm } from './LoginForm';
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
 
@@ -42,7 +43,7 @@ export default async function LoginPage({
           </div>
         </section>
 
-        <section className="border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-8 py-10">
+<section className="border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-8 py-10">
           <h2 className="text-[24px] font-semibold text-[var(--color-ink)]">Welcome back</h2>
           <p className="mt-2 text-sm text-[var(--color-ink-muted-48)]">Use the local Aura seed account to continue to cart, checkout, and orders.</p>
 
@@ -52,50 +53,8 @@ export default async function LoginPage({
             </div>
           ) : null}
 
-          <form action="/api/auth/login" method="post" className="mt-6 grid gap-4">
-            <input type="hidden" name="next" value={nextPath} />
-
-            <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-              Email
-              <input
-                type="email"
-                name="email"
-                defaultValue="customer@aura.local"
-                required
-                className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-[17px] text-[var(--color-ink)]"
-              />
-            </label>
-
-            <label className="grid gap-2 text-sm font-medium text-[var(--color-ink)]">
-              Password
-              <input
-                type="password"
-                name="password"
-                defaultValue="Customer123!"
-                required
-                className="rounded-[var(--rounded-pill)] border border-[var(--color-hairline)] bg-[var(--color-canvas)] px-4 py-3 text-[17px] text-[var(--color-ink)]"
-              />
-            </label>
-
-            <button
-              type="submit"
-              className="mt-2 rounded-[var(--rounded-pill)] bg-[var(--color-primary)] px-5 py-3 text-[17px] font-semibold text-[var(--color-on-primary)] transition hover:bg-[var(--color-primary-focus)]"
-            >
-              Sign in
-            </button>
-          </form>
-
-          <p className="mt-5 text-center text-sm text-[var(--color-ink-muted-48)]">
-            Don't have an account?{' '}
-            <Link href="/register" className="font-medium text-[var(--color-primary)] hover:underline">
-              Create one
-            </Link>
-          </p>
-
-          <Link href="/products" className="mt-6 inline-block text-sm font-medium text-[var(--color-primary)] hover:underline">
-            Continue browsing as guest
-          </Link>
-        </section>
+          <LoginForm next={nextPath} error={error} />
+</section>
       </div>
     </main>
   );

@@ -136,6 +136,13 @@ export interface LoginInput {
   password: string;
 }
 
+export interface RegisterInput {
+  email: string;
+  password: string;
+  firstName?: string;
+  lastName?: string;
+}
+
 export interface ProductCardModel {
   id: string;
   slug: string;

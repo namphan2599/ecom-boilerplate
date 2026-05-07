@@ -10,6 +10,7 @@ import type {
   HostedCheckoutSessionView,
   LoginInput,
   OrderListResponse,
+  RegisterInput,
 } from './types';
 
 const DEFAULT_API_BASE_URL = 'http://localhost:3000/api/v1';
@@ -107,6 +108,13 @@ export async function getTags() {
 
 export async function loginWithPassword(input: LoginInput): Promise<AuthTokenResponse> {
   return auraFetch<AuthTokenResponse>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function registerWithPassword(input: RegisterInput): Promise<AuthTokenResponse> {
+  return auraFetch<AuthTokenResponse>('/auth/register', {
     method: 'POST',
     body: JSON.stringify(input),
   });

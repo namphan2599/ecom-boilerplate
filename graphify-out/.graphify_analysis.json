@@ -1,0 +1,588 @@
+{
+  "communities": {
+    "0": [
+      "apps_backend_src_catalog_catalog_service_ts",
+      "catalog_catalog_service_catalogservice",
+      "catalog_catalog_service_catalogservice_buildcreateinput",
+      "catalog_catalog_service_catalogservice_buildproductimagekey",
+      "catalog_catalog_service_catalogservice_buildupdateinput",
+      "catalog_catalog_service_catalogservice_constructor",
+      "catalog_catalog_service_catalogservice_createfallbackproduct",
+      "catalog_catalog_service_catalogservice_createfallbackvariant",
+      "catalog_catalog_service_catalogservice_createproduct",
+      "catalog_catalog_service_catalogservice_deleteproductimage",
+      "catalog_catalog_service_catalogservice_getproductbyidforwrite",
+      "catalog_catalog_service_catalogservice_getproductbyslug",
+      "catalog_catalog_service_catalogservice_listcategories",
+      "catalog_catalog_service_catalogservice_listproducts",
+      "catalog_catalog_service_catalogservice_listtags",
+      "catalog_catalog_service_catalogservice_resolveimageextension",
+      "catalog_catalog_service_catalogservice_resolvevariantsnapshot",
+      "catalog_catalog_service_catalogservice_selectprice",
+      "catalog_catalog_service_catalogservice_toview",
+      "catalog_catalog_service_catalogservice_trydeleteobject",
+      "catalog_catalog_service_catalogservice_updateproduct",
+      "catalog_catalog_service_catalogservice_uploadproductimage"
+    ],
+    "1": [
+      "apps_backend_src_discounts_discounts_service_ts",
+      "discounts_discounts_service_discountsservice",
+      "discounts_discounts_service_discountsservice_assertcouponisusable",
+      "discounts_discounts_service_discountsservice_assertcouponusageavailable",
+      "discounts_discounts_service_discountsservice_assertsubtotal",
+      "discounts_discounts_service_discountsservice_constructor",
+      "discounts_discounts_service_discountsservice_creatediscount",
+      "discounts_discounts_service_discountsservice_deletediscountbyid",
+      "discounts_discounts_service_discountsservice_getcouponbycode",
+      "discounts_discounts_service_discountsservice_getdiscountbyid",
+      "discounts_discounts_service_discountsservice_getdiscounts",
+      "discounts_discounts_service_discountsservice_mapcouponorthrow",
+      "discounts_discounts_service_discountsservice_markcouponused",
+      "discounts_discounts_service_discountsservice_normalizecode",
+      "discounts_discounts_service_discountsservice_releasecouponusage",
+      "discounts_discounts_service_discountsservice_roundcurrency",
+      "discounts_discounts_service_discountsservice_seedfallbackcoupons",
+      "discounts_discounts_service_discountsservice_tocouponview",
+      "discounts_discounts_service_discountsservice_updatediscountbyid",
+      "discounts_discounts_service_discountsservice_validateandapplycoupon"
+    ],
+    "2": [
+      "apps_backend_src_seeding_fixtures_catalog_fixtures_ts",
+      "apps_backend_src_seeding_fixtures_coupons_fixtures_ts",
+      "apps_backend_src_seeding_seeding_service_ts",
+      "fixtures_catalog_fixtures_getseedproducts",
+      "fixtures_coupons_fixtures_buildseedcouponfixtures",
+      "seeding_seeding_service_seedingservice",
+      "seeding_seeding_service_seedingservice_assertsafetoseed",
+      "seeding_seeding_service_seedingservice_bump",
+      "seeding_seeding_service_seedingservice_constructor",
+      "seeding_seeding_service_seedingservice_createemptysummary",
+      "seeding_seeding_service_seedingservice_createrunstat",
+      "seeding_seeding_service_seedingservice_maprole",
+      "seeding_seeding_service_seedingservice_resolveprofile",
+      "seeding_seeding_service_seedingservice_seed",
+      "seeding_seeding_service_seedingservice_seedcatalog",
+      "seeding_seeding_service_seedingservice_seedcoupons",
+      "seeding_seeding_service_seedingservice_seedproduct",
+      "seeding_seeding_service_seedingservice_seedusers",
+      "seeding_seeding_service_seedingservice_uniqueby"
+    ],
+    "3": [
+      "apps_backend_src_payments_payments_service_ts",
+      "payments_payments_service_paymentsservice",
+      "payments_payments_service_paymentsservice_assertstatustransition",
+      "payments_payments_service_paymentsservice_constructor",
+      "payments_payments_service_paymentsservice_createcheckoutsession",
+      "payments_payments_service_paymentsservice_ensureinventoryseeded",
+      "payments_payments_service_paymentsservice_findorderfrompayload",
+      "payments_payments_service_paymentsservice_getcheckouttoken",
+      "payments_payments_service_paymentsservice_getorderbycheckouttoken",
+      "payments_payments_service_paymentsservice_handlepaymentfailed",
+      "payments_payments_service_paymentsservice_handlepaymentsucceeded",
+      "payments_payments_service_paymentsservice_handlewebhookevent",
+      "payments_payments_service_paymentsservice_isstripelikeevent",
+      "payments_payments_service_paymentsservice_listallorders",
+      "payments_payments_service_paymentsservice_listordersforuser",
+      "payments_payments_service_paymentsservice_nextordernumber",
+      "payments_payments_service_paymentsservice_parseandverifywebhook",
+      "payments_payments_service_paymentsservice_roundcurrency",
+      "payments_payments_service_paymentsservice_updateorderstatus"
+    ],
+    "4": [
+      "apps_backend_src_cart_cart_service_ts",
+      "cart_cart_service_cartservice",
+      "cart_cart_service_cartservice_additem",
+      "cart_cart_service_cartservice_buildsummary",
+      "cart_cart_service_cartservice_constructor",
+      "cart_cart_service_cartservice_createemptycart",
+      "cart_cart_service_cartservice_getcartforuser",
+      "cart_cart_service_cartservice_getcartkey",
+      "cart_cart_service_cartservice_getpersistencehealth",
+      "cart_cart_service_cartservice_loadcart",
+      "cart_cart_service_cartservice_onmoduledestroy",
+      "cart_cart_service_cartservice_onmoduleinit",
+      "cart_cart_service_cartservice_persistcart",
+      "cart_cart_service_cartservice_removeitem",
+      "cart_cart_service_cartservice_roundcurrency",
+      "cart_cart_service_cartservice_tocartitemview",
+      "cart_cart_service_cartservice_updateitem"
+    ],
+    "5": [
+      "apps_backend_src_inventory_inventory_service_ts",
+      "inventory_inventory_service_inventoryservice",
+      "inventory_inventory_service_inventoryservice_adjustonhand",
+      "inventory_inventory_service_inventoryservice_assertavailable",
+      "inventory_inventory_service_inventoryservice_assertpositivequantity",
+      "inventory_inventory_service_inventoryservice_confirmreservation",
+      "inventory_inventory_service_inventoryservice_getreservationkey",
+      "inventory_inventory_service_inventoryservice_getsellablequantity",
+      "inventory_inventory_service_inventoryservice_getsnapshot",
+      "inventory_inventory_service_inventoryservice_listreservationsforcheckout",
+      "inventory_inventory_service_inventoryservice_releaseexpiredreservations",
+      "inventory_inventory_service_inventoryservice_releasereservation",
+      "inventory_inventory_service_inventoryservice_reservestock",
+      "inventory_inventory_service_inventoryservice_seed"
+    ],
+    "6": [
+      "apps_backend_src_catalog_catalog_controller_ts",
+      "catalog_catalog_controller_catalogcontroller",
+      "catalog_catalog_controller_catalogcontroller_constructor",
+      "catalog_catalog_controller_catalogcontroller_createproduct",
+      "catalog_catalog_controller_catalogcontroller_deleteproductimage",
+      "catalog_catalog_controller_catalogcontroller_getproductbyslug",
+      "catalog_catalog_controller_catalogcontroller_listcategories",
+      "catalog_catalog_controller_catalogcontroller_listproducts",
+      "catalog_catalog_controller_catalogcontroller_listtags",
+      "catalog_catalog_controller_catalogcontroller_updateproduct",
+      "catalog_catalog_controller_catalogcontroller_uploadproductimage"
+    ],
+    "7": [
+      "apps_backend_src_storage_storage_service_ts",
+      "storage_storage_service_storageservice",
+      "storage_storage_service_storageservice_constructor",
+      "storage_storage_service_storageservice_deleteobject",
+      "storage_storage_service_storageservice_ensurebucketexists",
+      "storage_storage_service_storageservice_getdefaultbucket",
+      "storage_storage_service_storageservice_getfallbackmapkey",
+      "storage_storage_service_storageservice_getpublicurl",
+      "storage_storage_service_storageservice_isusingfallback",
+      "storage_storage_service_storageservice_trimtrailingslash",
+      "storage_storage_service_storageservice_uploadobject"
+    ],
+    "8": [
+      "apps_backend_src_auth_auth_controller_ts",
+      "auth_auth_controller_authcontroller",
+      "auth_auth_controller_authcontroller_constructor",
+      "auth_auth_controller_authcontroller_googlecallback",
+      "auth_auth_controller_authcontroller_googlelogin",
+      "auth_auth_controller_authcontroller_login",
+      "auth_auth_controller_authcontroller_profile",
+      "auth_auth_controller_authcontroller_register"
+    ],
+    "9": [
+      "apps_backend_src_discounts_discounts_controller_ts",
+      "discounts_discounts_controller_discountscontroller",
+      "discounts_discounts_controller_discountscontroller_constructor",
+      "discounts_discounts_controller_discountscontroller_creatediscount",
+      "discounts_discounts_controller_discountscontroller_deletediscount",
+      "discounts_discounts_controller_discountscontroller_getdiscountbyid",
+      "discounts_discounts_controller_discountscontroller_getdiscounts",
+      "discounts_discounts_controller_discountscontroller_updatediscount"
+    ],
+    "10": [
+      "apps_backend_src_health_health_service_ts",
+      "health_health_service_healthservice",
+      "health_health_service_healthservice_buildbasepayload",
+      "health_health_service_healthservice_constructor",
+      "health_health_service_healthservice_getliveness",
+      "health_health_service_healthservice_getreadiness",
+      "health_health_service_healthservice_getruntimehealth",
+      "health_health_service_healthservice_tomegabytes"
+    ],
+    "11": [
+      "apps_backend_src_auth_auth_service_ts",
+      "auth_auth_service_authservice",
+      "auth_auth_service_authservice_constructor",
+      "auth_auth_service_authservice_creategoogleuser",
+      "auth_auth_service_authservice_issuetoken",
+      "auth_auth_service_authservice_register",
+      "auth_auth_service_authservice_validatelocaluser"
+    ],
+    "12": [
+      "apps_backend_src_cart_cart_controller_ts",
+      "cart_cart_controller_cartcontroller",
+      "cart_cart_controller_cartcontroller_additem",
+      "cart_cart_controller_cartcontroller_constructor",
+      "cart_cart_controller_cartcontroller_getcart",
+      "cart_cart_controller_cartcontroller_removeitem",
+      "cart_cart_controller_cartcontroller_updateitem"
+    ],
+    "13": [
+      "apps_backend_src_prisma_prisma_service_ts",
+      "prisma_prisma_service_prismaservice",
+      "prisma_prisma_service_prismaservice_enableshutdownhooks",
+      "prisma_prisma_service_prismaservice_gethealthstatus",
+      "prisma_prisma_service_prismaservice_isready",
+      "prisma_prisma_service_prismaservice_onmoduledestroy",
+      "prisma_prisma_service_prismaservice_onmoduleinit"
+    ],
+    "14": [
+      "apps_backend_src_app_controller_ts",
+      "src_app_controller_appcontroller",
+      "src_app_controller_appcontroller_constructor",
+      "src_app_controller_appcontroller_getadminsummary",
+      "src_app_controller_appcontroller_gethello",
+      "src_app_controller_appcontroller_getorderhistorycontext"
+    ],
+    "15": [
+      "apps_backend_src_catalog_dto_create_product_dto_ts",
+      "dto_create_product_dto_catalogcategorydto",
+      "dto_create_product_dto_catalogtagdto",
+      "dto_create_product_dto_createproductdto",
+      "dto_create_product_dto_productvariantdto",
+      "dto_create_product_dto_variantpricedto"
+    ],
+    "16": [
+      "apps_backend_src_health_health_controller_ts",
+      "health_health_controller_healthcontroller",
+      "health_health_controller_healthcontroller_constructor",
+      "health_health_controller_healthcontroller_gethealth",
+      "health_health_controller_healthcontroller_getliveness",
+      "health_health_controller_healthcontroller_getreadiness"
+    ],
+    "17": [
+      "apps_backend_src_payments_orders_controller_ts",
+      "payments_orders_controller_orderscontroller",
+      "payments_orders_controller_orderscontroller_constructor",
+      "payments_orders_controller_orderscontroller_getallordersforadmin",
+      "payments_orders_controller_orderscontroller_getmyorders",
+      "payments_orders_controller_orderscontroller_updateorderstatus"
+    ],
+    "18": [
+      "apps_backend_src_auth_strategies_google_strategy_ts",
+      "strategies_google_strategy_googlestrategy",
+      "strategies_google_strategy_googlestrategy_constructor",
+      "strategies_google_strategy_googlestrategy_validate"
+    ],
+    "19": [
+      "apps_backend_src_auth_strategies_jwt_strategy_ts",
+      "strategies_jwt_strategy_jwtstrategy",
+      "strategies_jwt_strategy_jwtstrategy_constructor",
+      "strategies_jwt_strategy_jwtstrategy_validate"
+    ],
+    "20": [
+      "apps_backend_src_auth_strategies_local_strategy_ts",
+      "strategies_local_strategy_localstrategy",
+      "strategies_local_strategy_localstrategy_constructor",
+      "strategies_local_strategy_localstrategy_validate"
+    ],
+    "21": [
+      "apps_backend_src_common_auth_roles_guard_ts",
+      "auth_roles_guard_rolesguard",
+      "auth_roles_guard_rolesguard_canactivate",
+      "auth_roles_guard_rolesguard_constructor"
+    ],
+    "22": [
+      "apps_backend_src_common_filters_global_exception_filter_ts",
+      "filters_global_exception_filter_globalexceptionfilter",
+      "filters_global_exception_filter_globalexceptionfilter_catch",
+      "filters_global_exception_filter_globalexceptionfilter_getmessage"
+    ],
+    "23": [
+      "apps_backend_src_payments_checkout_controller_ts",
+      "payments_checkout_controller_checkoutcontroller",
+      "payments_checkout_controller_checkoutcontroller_constructor",
+      "payments_checkout_controller_checkoutcontroller_createcheckoutsession"
+    ],
+    "24": [
+      "apps_backend_src_payments_stripe_webhook_controller_ts",
+      "payments_stripe_webhook_controller_stripewebhookcontroller",
+      "payments_stripe_webhook_controller_stripewebhookcontroller_constructor",
+      "payments_stripe_webhook_controller_stripewebhookcontroller_handlestripewebhook"
+    ],
+    "25": [
+      "apps_backend_prisma_seed_ts",
+      "prisma_seed_bootstrap",
+      "prisma_seed_readprofileargument"
+    ],
+    "26": [
+      "apps_backend_src_app_service_ts",
+      "src_app_service_appservice",
+      "src_app_service_appservice_gethello"
+    ],
+    "27": [
+      "apps_backend_src_common_http_api_error_response_dto_ts",
+      "http_api_error_response_dto_apierrorresponsedto",
+      "http_api_error_response_dto_validationerrorresponsedto"
+    ],
+    "28": [
+      "apps_backend_src_app_module_ts",
+      "src_app_module_appmodule"
+    ],
+    "29": [
+      "apps_backend_src_main_ts",
+      "src_main_bootstrap"
+    ],
+    "30": [
+      "apps_backend_src_auth_auth_module_ts",
+      "auth_auth_module_authmodule"
+    ],
+    "31": [
+      "apps_backend_src_auth_dto_login_dto_ts",
+      "dto_login_dto_logindto"
+    ],
+    "32": [
+      "apps_backend_src_auth_dto_register_dto_ts",
+      "dto_register_dto_registerdto"
+    ],
+    "33": [
+      "apps_backend_src_auth_guards_google_auth_guard_ts",
+      "guards_google_auth_guard_googleauthguard"
+    ],
+    "34": [
+      "apps_backend_src_auth_guards_jwt_auth_guard_ts",
+      "guards_jwt_auth_guard_jwtauthguard"
+    ],
+    "35": [
+      "apps_backend_src_auth_guards_local_auth_guard_ts",
+      "guards_local_auth_guard_localauthguard"
+    ],
+    "36": [
+      "apps_backend_src_cart_cart_module_ts",
+      "cart_cart_module_cartmodule"
+    ],
+    "37": [
+      "apps_backend_src_cart_dto_add_cart_item_dto_ts",
+      "dto_add_cart_item_dto_addcartitemdto"
+    ],
+    "38": [
+      "apps_backend_src_cart_dto_update_cart_item_dto_ts",
+      "dto_update_cart_item_dto_updatecartitemdto"
+    ],
+    "39": [
+      "apps_backend_src_catalog_catalog_module_ts",
+      "catalog_catalog_module_catalogmodule"
+    ],
+    "40": [
+      "apps_backend_src_catalog_dto_update_product_dto_ts",
+      "dto_update_product_dto_updateproductdto"
+    ],
+    "41": [
+      "apps_backend_src_common_auth_roles_decorator_ts",
+      "auth_roles_decorator_roles"
+    ],
+    "42": [
+      "apps_backend_src_discounts_discounts_module_ts",
+      "discounts_discounts_module_discountsmodule"
+    ],
+    "43": [
+      "apps_backend_src_discounts_dto_create_discount_dto_ts",
+      "dto_create_discount_dto_creatediscountdto"
+    ],
+    "44": [
+      "apps_backend_src_discounts_dto_update_discount_dto_ts",
+      "dto_update_discount_dto_updatediscountdto"
+    ],
+    "45": [
+      "apps_backend_src_health_health_module_ts",
+      "health_health_module_healthmodule"
+    ],
+    "46": [
+      "apps_backend_src_inventory_inventory_module_ts",
+      "inventory_inventory_module_inventorymodule"
+    ],
+    "47": [
+      "apps_backend_src_payments_payments_integration_spec_ts",
+      "payments_payments_integration_spec_buildcart"
+    ],
+    "48": [
+      "apps_backend_src_payments_payments_module_ts",
+      "payments_payments_module_paymentsmodule"
+    ],
+    "49": [
+      "apps_backend_src_payments_payments_service_spec_ts",
+      "payments_payments_service_spec_buildcart"
+    ],
+    "50": [
+      "apps_backend_src_payments_dto_create_checkout_session_dto_ts",
+      "dto_create_checkout_session_dto_createcheckoutsessiondto"
+    ],
+    "51": [
+      "apps_backend_src_payments_dto_update_order_status_dto_ts",
+      "dto_update_order_status_dto_updateorderstatusdto"
+    ],
+    "52": [
+      "apps_backend_src_prisma_prisma_module_ts",
+      "prisma_prisma_module_prismamodule"
+    ],
+    "53": [
+      "apps_backend_src_seeding_seeding_module_ts",
+      "seeding_seeding_module_seedingmodule"
+    ],
+    "54": [
+      "apps_backend_src_seeding_seeding_service_spec_ts",
+      "seeding_seeding_service_spec_createmockprisma"
+    ],
+    "55": [
+      "apps_backend_src_storage_storage_module_ts",
+      "storage_storage_module_storagemodule"
+    ],
+    "56": [
+      "apps_backend_src_storage_storage_service_spec_ts",
+      "storage_storage_service_spec_restoreenvvalue"
+    ],
+    "57": [
+      "apps_backend_src_app_controller_spec_ts"
+    ],
+    "58": [
+      "apps_backend_src_auth_auth_controller_spec_ts"
+    ],
+    "59": [
+      "apps_backend_src_auth_auth_service_spec_ts"
+    ],
+    "60": [
+      "apps_backend_src_auth_dto_register_dto_spec_ts"
+    ],
+    "61": [
+      "apps_backend_src_catalog_catalog_service_spec_ts"
+    ],
+    "62": [
+      "apps_backend_src_common_auth_role_enum_ts"
+    ],
+    "63": [
+      "apps_backend_src_discounts_discounts_service_spec_ts"
+    ],
+    "64": [
+      "apps_backend_src_inventory_inventory_service_spec_ts"
+    ],
+    "65": [
+      "apps_backend_src_seeding_fixtures_users_fixtures_ts"
+    ],
+    "66": [
+      "apps_backend_src_storage_storage_types_ts"
+    ],
+    "67": [
+      "apps_backend_test_app_e2e_spec_ts"
+    ]
+  },
+  "cohesion": {
+    "0": 0.16,
+    "1": 0.19,
+    "2": 0.19,
+    "3": 0.16,
+    "4": 0.25,
+    "5": 0.3,
+    "6": 0.18,
+    "7": 0.27,
+    "8": 0.25,
+    "9": 0.25,
+    "10": 0.39,
+    "11": 0.33,
+    "12": 0.29,
+    "13": 0.29,
+    "14": 0.33,
+    "15": 0.33,
+    "16": 0.4,
+    "17": 0.33,
+    "18": 0.5,
+    "19": 0.5,
+    "20": 0.5,
+    "21": 0.5,
+    "22": 0.67,
+    "23": 0.5,
+    "24": 0.5,
+    "25": 1.0,
+    "26": 0.67,
+    "27": 0.67,
+    "28": 1.0,
+    "29": 1.0,
+    "30": 1.0,
+    "31": 1.0,
+    "32": 1.0,
+    "33": 1.0,
+    "34": 1.0,
+    "35": 1.0,
+    "36": 1.0,
+    "37": 1.0,
+    "38": 1.0,
+    "39": 1.0,
+    "40": 1.0,
+    "41": 1.0,
+    "42": 1.0,
+    "43": 1.0,
+    "44": 1.0,
+    "45": 1.0,
+    "46": 1.0,
+    "47": 1.0,
+    "48": 1.0,
+    "49": 1.0,
+    "50": 1.0,
+    "51": 1.0,
+    "52": 1.0,
+    "53": 1.0,
+    "54": 1.0,
+    "55": 1.0,
+    "56": 1.0,
+    "57": 1.0,
+    "58": 1.0,
+    "59": 1.0,
+    "60": 1.0,
+    "61": 1.0,
+    "62": 1.0,
+    "63": 1.0,
+    "64": 1.0,
+    "65": 1.0,
+    "66": 1.0,
+    "67": 1.0
+  },
+  "gods": [
+    {
+      "id": "catalog_catalog_service_catalogservice",
+      "label": "CatalogService",
+      "degree": 21
+    },
+    {
+      "id": "discounts_discounts_service_discountsservice",
+      "label": "DiscountsService",
+      "degree": 19
+    },
+    {
+      "id": "payments_payments_service_paymentsservice",
+      "label": "PaymentsService",
+      "degree": 18
+    },
+    {
+      "id": "cart_cart_service_cartservice",
+      "label": "CartService",
+      "degree": 16
+    },
+    {
+      "id": "seeding_seeding_service_seedingservice",
+      "label": "SeedingService",
+      "degree": 14
+    },
+    {
+      "id": "inventory_inventory_service_inventoryservice",
+      "label": "InventoryService",
+      "degree": 13
+    },
+    {
+      "id": "catalog_catalog_controller_catalogcontroller",
+      "label": "CatalogController",
+      "degree": 10
+    },
+    {
+      "id": "storage_storage_service_storageservice",
+      "label": "StorageService",
+      "degree": 10
+    },
+    {
+      "id": "auth_auth_controller_authcontroller",
+      "label": "AuthController",
+      "degree": 7
+    },
+    {
+      "id": "discounts_discounts_controller_discountscontroller",
+      "label": "DiscountsController",
+      "degree": 7
+    }
+  ],
+  "surprises": [],
+  "questions": [
+    {
+      "type": "bridge_node",
+      "question": "Why does `getSeedProducts()` connect `Community 2` to `Community 0`?",
+      "why": "High betweenness centrality (0.019) - this node is a cross-community bridge."
+    },
+    {
+      "type": "bridge_node",
+      "question": "Why does `buildSeedCouponFixtures()` connect `Community 2` to `Community 1`?",
+      "why": "High betweenness centrality (0.018) - this node is a cross-community bridge."
+    },
+    {
+      "type": "isolated_nodes",
+      "question": "What connects `AppModule`, `AuthModule`, `LoginDto` to the rest of the system?",
+      "why": "30 weakly-connected nodes found - possible documentation gaps or missing edges."
+    }
+  ]
+}
