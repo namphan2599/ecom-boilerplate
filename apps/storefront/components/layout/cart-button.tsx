@@ -43,6 +43,7 @@ export function CartButton() {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        data-cart-button
         onMouseEnter={() => setIsOpen(true)}
         className="relative flex items-center justify-center rounded-full p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
         aria-label={`Shopping bag with ${totalCount} items`}

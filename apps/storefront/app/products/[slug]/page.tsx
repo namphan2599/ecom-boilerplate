@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { addToCartAction } from '@/app/actions';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AddToCartButton } from '@/components/catalog/add-to-cart-button';
 import { getProductBySlug } from '@/lib/aura/client';
 import { getPrimaryPrice } from '@/lib/aura/mappers';
 import type { CatalogProductView } from '@/lib/aura/types';
@@ -120,9 +121,7 @@ export default async function ProductDetailPage({ params }: { params: Params }) 
                 />
               </div>
 
-              <Button type="submit" className="w-full">
-                Add to Bag
-              </Button>
+              <AddToCartButton>Add to Bag</AddToCartButton>
             </form>
           ) : (
             <div className="rounded-lg border border-dashed border-[var(--color-hairline)] bg-[var(--color-surface-pearl)] p-6">
