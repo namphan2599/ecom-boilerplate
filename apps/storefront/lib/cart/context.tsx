@@ -1,7 +1,8 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import type { CartView, CartItemView } from '@/lib/aura/types';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useRouter } from 'next/navigation';
+import type { CartView } from '@/lib/aura/types';
 
 interface CartContextValue {
   cart: CartView | null;
@@ -15,8 +16,9 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartView | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
-  const fetchCart = async () => {
+  const fetchCart = useCallback(async () => {
     setIsLoading(true);
     try {
       const res = await fetch('/api/cart', {
@@ -31,11 +33,28 @@ export function CartProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchCart();
-  }, []);
+  }, [fetchCart]);
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      fetchCart();
+    };
+
+    window.addEventListener('popstate', handleRouteChange);
+    const originalPush = router.push;
+    router.push = ((...args: Parameters<typeof router.push>) => {
+      handleRouteChange();
+      return originalPush(...args);
+    }) as typeof router.push;
+
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, [router, fetchCart]);
 
   const totalCount = cart?.summary.itemCount ?? 0;
 
