@@ -3,6 +3,8 @@ import { Geist, Geist_Mono } from 'next/font/google';
 import { PageShell } from '@/components/layout/page-shell';
 import { SiteFooter } from '@/components/layout/site-footer';
 import { SiteHeader } from '@/components/layout/site-header';
+import { CartProvider } from '@/lib/cart/context';
+import { getProfile, getCart } from '@/lib/aura/client';
 import { getSession } from '@/lib/auth/session';
 import './globals.css';
 
@@ -31,6 +33,7 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getSession();
+  const initialCart = session ? await getCart(session.token) : null;
 
   return (
     <html
@@ -38,11 +41,13 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-slate-50 text-slate-950">
-        <div className="flex min-h-screen flex-col">
-          <SiteHeader user={session?.user ?? null} />
-          <PageShell>{children}</PageShell>
-          <SiteFooter />
-        </div>
+        <CartProvider initialCart={initialCart}>
+          <div className="flex min-h-screen flex-col">
+            <SiteHeader user={session?.user ?? null} />
+            <PageShell>{children}</PageShell>
+            <SiteFooter />
+          </div>
+        </CartProvider>
       </body>
     </html>
   );
