@@ -43,6 +43,7 @@ export function CartButton() {
   return (
     <div className="relative" ref={dropdownRef}>
       <button
+        data-cart-button
         onMouseEnter={() => setIsOpen(true)}
         className="relative flex items-center justify-center rounded-full p-2 text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
         aria-label={`Shopping bag with ${totalCount} items`}
@@ -58,26 +59,16 @@ export function CartButton() {
       {isOpen && (
         <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-lg border border-slate-200 bg-white p-4 shadow-lg">
           <h3 className="mb-3 text-sm font-semibold text-slate-900">Shopping Bag</h3>
-
-          {!cart?.items || cart.items.length === 0 ? (
+          
+          {(!cart?.items || cart.items.length === 0) ? (
             <p className="text-sm text-slate-500">Your bag is empty</p>
           ) : (
             <ul className="max-h-64 space-y-3 overflow-y-auto">
               {cart.items.slice(0, 5).map((item) => (
                 <li key={item.sku} className="flex gap-3">
-                  <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded bg-slate-100">
-                    {item.attributes?.imageUrl && (
-                      <img
-                        src={item.attributes.imageUrl}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    )}
-                  </div>
+                  <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded bg-slate-100" />
                   <div className="flex-1 min-w-0">
-                    <p className="truncate text-sm font-medium text-slate-900">
-                      {item.productName}
-                    </p>
+                    <p className="truncate text-sm font-medium text-slate-900">{item.productName}</p>
                     <p className="text-sm text-slate-500">
                       {item.quantity} × {item.currencyCode} {item.unitPrice.toFixed(2)}
                     </p>
@@ -89,7 +80,7 @@ export function CartButton() {
               )}
             </ul>
           )}
-
+          
           {cart?.items && cart.items.length > 0 && (
             <Link
               href="/cart"
